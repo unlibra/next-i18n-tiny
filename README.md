@@ -42,8 +42,7 @@ your-app/
 ├── messages/
 │   ├── en.ts
 │   └── ja.ts
-├── src/
-│   └── i18n.ts
+├── i18n.ts
 └── proxy.ts
 ```
 
@@ -81,10 +80,10 @@ export default {
 
 **2. Define i18n instance**
 
-Place this file anywhere in your project (`src/i18n.ts`, `lib/i18n/index.ts`, etc.)
+Place this file anywhere in your project (`i18n.ts`, `lib/i18n.ts`, etc.)
 
 ```typescript
-// src/i18n.ts
+// i18n.ts
 import { define } from 'next-i18n-tiny'
 import enMessages from '@/messages/en'
 import jaMessages from '@/messages/ja'
@@ -105,6 +104,8 @@ export const { getMessages, getTranslations } = server
 ```
 
 **3. Setup Proxy** (Next.js 16+)
+
+> For Next.js 15 or earlier, use `middleware.ts` instead. See [official migration guide](https://nextjs.org/docs/messages/middleware-to-proxy).
 
 ```typescript
 // proxy.ts
@@ -132,36 +133,6 @@ export const config = {
   matcher: ['/((?!api|_next|.*\\..*).*)']
 }
 ```
-
-<details>
-<summary>For Next.js 15 or earlier (middleware.ts)</summary>
-
-```typescript
-// middleware.ts
-import { NextRequest, NextResponse } from 'next/server'
-
-const locales = ['ja', 'en']
-const defaultLocale = 'ja'
-
-export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
-
-  const hasLocale = locales.some(
-    (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
-  )
-
-  if (hasLocale) return
-
-  request.nextUrl.pathname = `/${defaultLocale}${pathname}`
-  return NextResponse.redirect(request.nextUrl)
-}
-
-export const config = {
-  matcher: ['/((?!api|_next|.*\\..*).*)']
-}
-```
-
-</details>
 
 **4. Use in Layout**
 
