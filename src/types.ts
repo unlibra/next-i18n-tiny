@@ -13,6 +13,7 @@ export type NestedKeys<T, Prefix extends string = ''> = {
 /**
  * Configuration for i18n system
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface I18nConfig<L extends string, M extends Record<string, any>> {
   locales: readonly L[]
   defaultLocale: L

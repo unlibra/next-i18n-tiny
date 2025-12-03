@@ -11,7 +11,7 @@ import type { NestedKeys } from './types'
 
 export interface I18nConfig<
   L extends readonly string[],
-  M extends Record<string, any>,
+  M extends Record<string, any>, // eslint-disable-line @typescript-eslint/no-explicit-any
   Msgs extends Record<L[number], M> = Record<L[number], M>
 > {
   locales: L
@@ -45,7 +45,7 @@ export interface I18nConfig<
  */
 export function define<
   L extends readonly string[],
-  M extends Record<string, any>,
+  M extends Record<string, any>, // eslint-disable-line @typescript-eslint/no-explicit-any
   Msgs extends Record<L[number], M>
 > (config: { locales: L; defaultLocale: L[number]; messages: Msgs }) {
   const { locales, defaultLocale, messages } = config
@@ -78,13 +78,18 @@ export function define<
       const moduleObj = messages[locale as L[number]]
       const msgs = JSON.parse(JSON.stringify(moduleObj))
 
-      return ((key: MessageKeys) => {
+      return (key: MessageKeys): string => {
         const fullKey = namespace ? `${String(namespace)}.${key}` : key
         const keys = fullKey.split('.')
-        let obj: any = msgs
+        let obj: unknown = msgs
 
         for (const k of keys) {
-          obj = obj?.[k]
+          if (obj && typeof obj === 'object' && k in obj) {
+            obj = (obj as Record<string, unknown>)[k]
+          } else {
+            obj = undefined
+          }
+
           if (obj === undefined) {
             if (process.env.NODE_ENV === 'development') {
               console.warn(`[i18n] Missing key: "${fullKey}" in locale "${locale}"`)
@@ -93,8 +98,8 @@ export function define<
           }
         }
 
-        return obj
-      }) as (key: MessageKeys) => string
+        return String(obj)
+      }
     }
   }
 

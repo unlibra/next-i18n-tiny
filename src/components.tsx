@@ -6,7 +6,7 @@ import { createContext, useCallback, useContext, useMemo } from 'react'
 
 interface I18nContextValue {
   locale: string
-  messages: any
+  messages: Record<string, unknown>
   defaultLocale: string
   locales: readonly string[]
 }
@@ -23,7 +23,7 @@ function useI18n () {
 
 export interface I18nProviderProps {
   locale: string
-  messages: any
+  messages: Record<string, unknown>
   defaultLocale: string
   locales: readonly string[]
   children: ReactNode
@@ -53,7 +53,7 @@ export function I18nProvider ({
   )
 }
 
-export function useMessages<T = any> (): T {
+export function useMessages<T = Record<string, unknown>> (): T {
   return useI18n().messages as T
 }
 
@@ -61,13 +61,18 @@ export function useTranslations<K extends string = string> (namespace?: string):
   const { locale, messages } = useI18n()
 
   return useCallback(
-    ((key: K) => {
+    (key: K): string => {
       const fullKey = namespace ? `${String(namespace)}.${key}` : key
       const keys = fullKey.split('.')
-      let obj: any = messages
+      let obj: unknown = messages
 
       for (const k of keys) {
-        obj = obj?.[k]
+        if (obj && typeof obj === 'object' && k in obj) {
+          obj = (obj as Record<string, unknown>)[k]
+        } else {
+          obj = undefined
+        }
+
         if (obj === undefined) {
           if (process.env.NODE_ENV === 'development') {
             console.warn(`[i18n] Missing key: "${fullKey}" in locale "${locale}"`)
@@ -76,8 +81,8 @@ export function useTranslations<K extends string = string> (namespace?: string):
         }
       }
 
-      return obj
-    }) as (key: K) => string,
+      return String(obj)
+    },
     [namespace, messages, locale]
   )
 }
