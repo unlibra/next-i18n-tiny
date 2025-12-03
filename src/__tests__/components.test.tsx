@@ -131,6 +131,7 @@ describe('useTranslations', () => {
 
     function TestComponent() {
       const t = i18n.client.useTranslations()
+      // @ts-expect-error Testing non-existent key
       return <div>{t('nonexistent.key')}</div>
     }
 
@@ -148,6 +149,7 @@ describe('useTranslations', () => {
 
     function TestComponent() {
       const t = i18n.client.useTranslations('nav')
+      // @ts-expect-error Testing namespace with partial key
       return <div>{t('home')}</div>
     }
 

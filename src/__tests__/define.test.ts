@@ -99,6 +99,7 @@ describe('define()', () => {
       })
 
       const t = await i18n.server.getTranslations('en')
+      // @ts-expect-error Testing non-existent key
       expect(t('nonexistent.key')).toBe('nonexistent.key')
     })
 
@@ -110,7 +111,9 @@ describe('define()', () => {
       })
 
       const t = await i18n.server.getTranslations('en', 'common')
+      // @ts-expect-error Testing namespace with partial key
       expect(t('hello')).toBe('Hello')
+      // @ts-expect-error Testing namespace with partial key
       expect(t('world')).toBe('World')
     })
   })
