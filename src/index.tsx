@@ -141,8 +141,6 @@ export function define<
     Provider,
     Link: I18nLink,
     server,
-    client,
-    locales,
-    defaultLocale
+    client
   }
 }

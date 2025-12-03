@@ -33,8 +33,6 @@ describe('define()', () => {
       messages: { en: enMessages, ja: jaMessages }
     })
 
-    expect(i18n.locales).toEqual(['en', 'ja'])
-    expect(i18n.defaultLocale).toBe('en')
     expect(i18n.Provider).toBeDefined()
     expect(i18n.Link).toBeDefined()
     expect(i18n.server).toBeDefined()

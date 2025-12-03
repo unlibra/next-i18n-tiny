@@ -69,27 +69,31 @@ export type Locale = 'ja' | 'en'
 const locales: Locale[] = ['ja', 'en']
 const defaultLocale: Locale = 'ja'
 
-export const i18n = define({
+const { client, server, Link, Provider } = define({
   locales,
   defaultLocale,
   messages: { ja: jaMessages, en: enMessages }
 })
+
+export { Link, Provider }
+export const { useMessages, useTranslations, useLocale } = client
+export const { getMessages, getTranslations } = server
 ```
 
 **3. Use in Layout**
 
 ```typescript
 // app/[locale]/layout.tsx
-import { i18n, type Locale } from '@/i18n'
+import { Provider, getMessages, type Locale } from '@/i18n'
 
 export default async function Layout({ children, params }) {
   const { locale } = await params
-  const messages = await i18n.server.getMessages(locale)
+  const messages = await getMessages(locale)
 
   return (
-    <i18n.Provider locale={locale} messages={messages}>
+    <Provider locale={locale} messages={messages}>
       {children}
-    </i18n.Provider>
+    </Provider>
   )
 }
 ```
@@ -98,13 +102,13 @@ export default async function Layout({ children, params }) {
 
 ```typescript
 // Server Component
-import { i18n, type Locale } from '@/i18n'
+import { getMessages, getTranslations, type Locale } from '@/i18n'
 
 export async function ServerComponent({ locale }: { locale: Locale }) {
   /* Direct object access */
-  const messages = await i18n.server.getMessages(locale)
+  const messages = await getMessages(locale)
   /* Function call */
-  const t = await i18n.server.getTranslations(locale)
+  const t = await getTranslations(locale)
 
   return (
     <div>
@@ -120,20 +124,20 @@ export async function ServerComponent({ locale }: { locale: Locale }) {
 ```typescript
 // Client Component
 'use client'
-import { i18n } from '@/i18n'
+import { Link, useMessages, useTranslations } from '@/i18n'
 
 export function ClientComponent() {
   /* Direct object access */
-  const messages = i18n.client.useMessages()
+  const messages = useMessages()
   /* Function call */
-  const t = i18n.client.useTranslations()
+  const t = useTranslations()
 
   return (
     <div>
       <h1>{messages.common.title}</h1>
       {/*           ^^^^^ Auto-complete */}
-      <i18n.Link href="/about">{t('nav.about')}</i18n.Link>
-      {/*                          ^^^^^^^^^ Auto-complete */}
+      <Link href="/about">{t('nav.about')}</Link>
+      {/*                    ^^^^^^^^^ Auto-complete */}
     </div>
   )
 }
@@ -147,70 +151,6 @@ That's it! **Types are automatically inferred** - no manual type annotations nee
 - `t('site.name')` - Function call (useful for dynamic keys)
 
 Both are fully typed with autocomplete. Use whichever you prefer!
-
----
-
-### Tips: Cleaner Imports
-
-For shorter, cleaner imports, you can re-export from your i18n config:
-
-**Create re-export files:**
-
-```typescript
-// src/lib/i18n/index.ts
-import { define } from 'next-i18n-tiny'
-import enMessages from '@/messages/en'
-import jaMessages from '@/messages/ja'
-
-export type Locale = 'ja' | 'en'
-export const locales: Locale[] = ['ja', 'en']
-export const defaultLocale: Locale = 'ja'
-
-export const i18n = define({
-  locales,
-  defaultLocale,
-  messages: { ja: jaMessages, en: enMessages }
-})
-
-// Re-export for convenience
-export const Provider = i18n.Provider
-export const Link = i18n.Link
-```
-
-```typescript
-// src/lib/i18n/server.ts
-import { i18n } from './index'
-
-export const getMessages = i18n.server.getMessages
-export const getTranslations = i18n.server.getTranslations
-```
-
-```typescript
-// src/lib/i18n/client.ts
-import { i18n } from './index'
-
-export const useMessages = i18n.client.useMessages
-export const useTranslations = i18n.client.useTranslations
-export const useLocale = i18n.client.useLocale
-```
-
-**Then use with cleaner imports:**
-
-```typescript
-// Layout
-import { Provider } from '@/lib/i18n'
-import { getMessages } from '@/lib/i18n/server'
-
-// Server Component
-import { Link, type Locale } from '@/lib/i18n'
-import { getMessages, getTranslations } from '@/lib/i18n/server'
-
-// Client Component
-import { Link } from '@/lib/i18n'
-import { useTranslations, useLocale } from '@/lib/i18n/client'
-```
-
----
 
 ## API Reference
 
@@ -238,9 +178,7 @@ Defines an i18n instance with automatic type inference.
     useMessages,   // Get messages object (hook)
     useTranslations, // Get translation function (hook)
     useLocale      // Get current locale (hook)
-  },
-  locales,         // Available locales
-  defaultLocale    // Default locale
+  }
 }
 ```
 
