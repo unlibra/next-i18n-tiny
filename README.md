@@ -1,5 +1,11 @@
 # next-i18n-tiny
 
+[![npm version](https://img.shields.io/npm/v/next-i18n-tiny.svg)](https://www.npmjs.com/package/next-i18n-tiny)
+<!-- [![npm downloads](https://img.shields.io/npm/dm/next-i18n-tiny.svg)](https://www.npmjs.com/package/next-i18n-tiny) -->
+[![CI](https://github.com/unlibra/next-i18n-tiny/workflows/CI/badge.svg)](https://github.com/unlibra/next-i18n-tiny/actions)
+[![License](https://img.shields.io/npm/l/next-i18n-tiny.svg)](https://github.com/unlibra/next-i18n-tiny/blob/main/LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org/)
+
 Type-safe, zero-dependency i18n library for Next.js App Router with React Server Components support.
 
 Inspired by next-intl, designed for simplicity and type safety.
