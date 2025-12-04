@@ -4,6 +4,7 @@
  */
 
 import type { ReactNode } from 'react'
+import { I18nLink } from './components'
 import type { NestedKeys } from './types'
 import { resolveMessage } from './utils'
 
@@ -68,12 +69,6 @@ export function define<
     clientOnlyError('Provider')
   }
 
-  // Link - throws error on server
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  function Link (_props: Record<string, unknown>): ReactNode {
-    clientOnlyError('Link')
-  }
-
   // Client API - all throw errors on server
   const client = {
     useMessages: (): MessageType => clientOnlyError('useMessages'),
@@ -84,7 +79,7 @@ export function define<
 
   return {
     Provider,
-    Link,
+    Link: I18nLink,
     server,
     client
   }
