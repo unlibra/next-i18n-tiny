@@ -1,18 +1,28 @@
 ---
-import { i18n } from '../../i18n';
+import { locales, defaultLocale, getTranslations } from '../../i18n'
+import Link from '@i18n-tiny/astro/router/Link.astro'
 
 export function getStaticPaths() {
-  return i18n.locales.map(locale => ({ params: { locale } }));
+  return locales.map(locale => ({ params: { locale } }))
 }
 
-const { locale } = Astro.params;
-const t = i18n.getTranslations(locale);
-const currentPath = Astro.url.pathname;
+const { locale } = Astro.params
+const t = getTranslations(locale!)
 
-// Simple language switcher logic
-const switchUrl = locale === 'en' 
-  ? currentPath.replace(/^\/en/, '/ja') 
-  : currentPath.replace(/^\/ja/, '/en');
+const buttonStyle = (isActive: boolean) => `
+  height: 2rem;
+  padding: 0 1rem;
+  font-size: 1rem;
+  line-height: 2rem;
+  background-color: ${isActive ? '#007bff' : '#6c757d'};
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin: 0.5rem;
+  text-decoration: none;
+  display: inline-block;
+`
 ---
 
 <html lang={locale}>
@@ -21,15 +31,28 @@ const switchUrl = locale === 'en'
     <title>{t('common.title')}</title>
   </head>
   <body style="padding: 2rem; font-family: system-ui;">
+    <nav style="margin-bottom: 2rem;">
+      <Link href="/" locale={locale!} defaultLocale={defaultLocale} prefixDefault style="margin-right: 1rem;">{t('nav.home')}</Link>
+      <Link href="/about" locale={locale!} defaultLocale={defaultLocale} prefixDefault>{t('nav.about')}</Link>
+    </nav>
+
     <h1>{t('home.welcome')}</h1>
     <p>{t('common.description')}</p>
-    
+    <p>{t('common.currentLocale', { locale })}</p>
+
+    <div style="margin-top: 1rem;">
+      <h3>{t('home.greeting', { name: 'User' })}</h3>
+    </div>
+
     <hr style="margin: 2rem 0;" />
-    
-    <p>Current locale: <strong>{locale}</strong></p>
-    
-    <a href={switchUrl}>
-      {t('home.switch')} ({locale === 'en' ? 'JA' : 'EN'})
-    </a>
+
+    <div>
+      <a href="/en" style={buttonStyle(locale === 'en')}>
+        English
+      </a>
+      <a href="/ja" style={buttonStyle(locale === 'ja')}>
+        日本語
+      </a>
+    </div>
   </body>
 </html>

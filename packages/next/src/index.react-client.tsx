@@ -2,7 +2,6 @@
 
 import type { ReactNode } from 'react'
 
-import { Link as I18nLink } from './router/Link'
 import { useLocalizedPath } from './router/useLocalizedPath'
 import {
   I18nProvider as BaseProvider,
@@ -11,7 +10,8 @@ import {
   useLocale as baseUseLocale
 } from '@i18n-tiny/react/internal'
 import type { NestedKeys } from '@i18n-tiny/core'
-import { resolveMessage, removeLocalePrefix } from '@i18n-tiny/core'
+import { resolveMessage } from '@i18n-tiny/core'
+import { removeLocalePrefix } from './router/removeLocalePrefix'
 
 export interface I18nConfig<
   L extends readonly string[],
@@ -140,7 +140,6 @@ export function define<
 
   return {
     Provider,
-    Link: I18nLink,
     locales,
     defaultLocale,
     server,

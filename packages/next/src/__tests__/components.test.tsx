@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { define } from '../index.react-client'
+import { Link } from '../router'
 
 const enMessages = {
   common: {
@@ -188,7 +189,7 @@ describe('Link', () => {
 
     render(
       <i18n.Provider locale="ja" messages={messages}>
-        <i18n.Link href="/about">About</i18n.Link>
+        <Link href="/about">About</Link>
       </i18n.Provider>
     )
 
@@ -202,7 +203,7 @@ describe('Link', () => {
 
     render(
       <i18n.Provider locale="en" messages={messages}>
-        <i18n.Link href="/about">About</i18n.Link>
+        <Link href="/about">About</Link>
       </i18n.Provider>
     )
 

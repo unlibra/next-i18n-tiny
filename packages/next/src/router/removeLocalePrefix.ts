@@ -6,9 +6,13 @@
  * @returns The pathname without locale prefix
  *
  * @example
+ * ```typescript
+ * import { removeLocalePrefix } from '@i18n-tiny/next/router'
+ *
  * removeLocalePrefix('/ja/about', ['en', 'ja']) // '/about'
  * removeLocalePrefix('/ja', ['en', 'ja'])       // '/'
  * removeLocalePrefix('/about', ['en', 'ja'])    // '/about'
+ * ```
  */
 export function removeLocalePrefix(
   pathname: string,

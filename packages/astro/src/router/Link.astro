@@ -1,0 +1,34 @@
+---
+/**
+ * Localized Link component for Astro
+ *
+ * @example
+ * ```astro
+ * import { Link } from '@i18n-tiny/astro/router'
+ *
+ * <Link href="/about" locale={locale} defaultLocale={defaultLocale}>About</Link>
+ * <Link href="/about" locale={locale} defaultLocale={defaultLocale} prefixDefault>About</Link>
+ * ```
+ */
+import type { HTMLAttributes } from 'astro/types'
+import { getLocalizedPath } from './index'
+
+interface Props extends HTMLAttributes<'a'> {
+  /** The path to navigate to */
+  href: string
+  /** Current locale */
+  locale: string
+  /** Default locale */
+  defaultLocale: string
+  /** Whether to add prefix for default locale (for static builds) */
+  prefixDefault?: boolean
+}
+
+const { href, locale, defaultLocale, prefixDefault = false, ...attrs } = Astro.props
+
+const localizedHref = getLocalizedPath(href, locale, defaultLocale, prefixDefault)
+---
+
+<a href={localizedHref} {...attrs}>
+  <slot />
+</a>

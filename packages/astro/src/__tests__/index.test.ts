@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { define } from '../index'
+import { getLocalizedPath, removeLocalePrefix } from '../router/index'
 
 // Test messages
 const enMessages = {
@@ -107,40 +108,57 @@ describe('define', () => {
     })
   })
 
-  describe('getLocalizedPath', () => {
+  describe('getLocalizedPath (standalone function)', () => {
     it('should not add prefix for default locale', () => {
-      const path = i18n.getLocalizedPath('/about', 'en')
+      const path = getLocalizedPath('/about', 'en', 'en')
       expect(path).toBe('/about')
     })
 
     it('should add prefix for non-default locale', () => {
-      const path = i18n.getLocalizedPath('/about', 'ja')
+      const path = getLocalizedPath('/about', 'ja', 'en')
       expect(path).toBe('/ja/about')
     })
 
     it('should handle root path for non-default locale', () => {
-      const path = i18n.getLocalizedPath('/', 'ja')
+      const path = getLocalizedPath('/', 'ja', 'en')
       expect(path).toBe('/ja')
     })
 
     it('should handle root path for default locale', () => {
-      const path = i18n.getLocalizedPath('/', 'en')
+      const path = getLocalizedPath('/', 'en', 'en')
       expect(path).toBe('/')
     })
 
     it('should avoid double prefixing', () => {
-      const path = i18n.getLocalizedPath('/ja/about', 'ja')
+      const path = getLocalizedPath('/ja/about', 'ja', 'en')
       expect(path).toBe('/ja/about')
     })
 
-    it('should use default locale when locale is undefined', () => {
-      const path = i18n.getLocalizedPath('/about', undefined)
-      expect(path).toBe('/about')
+    it('should add prefix for default locale when prefixDefault is true', () => {
+      const path = getLocalizedPath('/about', 'en', 'en', true)
+      expect(path).toBe('/en/about')
     })
 
     it('should handle paths without leading slash', () => {
-      const path = i18n.getLocalizedPath('about', 'ja')
+      const path = getLocalizedPath('about', 'ja', 'en')
       expect(path).toBe('/ja/about')
+    })
+  })
+
+  describe('removeLocalePrefix (standalone function)', () => {
+    it('should remove locale prefix', () => {
+      expect(removeLocalePrefix('/ja/about', ['en', 'ja'])).toBe('/about')
+      expect(removeLocalePrefix('/en/contact', ['en', 'ja'])).toBe('/contact')
+    })
+
+    it('should handle root locale paths', () => {
+      expect(removeLocalePrefix('/en', ['en', 'ja'])).toBe('/')
+      expect(removeLocalePrefix('/ja', ['en', 'ja'])).toBe('/')
+    })
+
+    it('should not modify paths without locale prefix', () => {
+      expect(removeLocalePrefix('/about', ['en', 'ja'])).toBe('/about')
+      expect(removeLocalePrefix('/', ['en', 'ja'])).toBe('/')
     })
   })
 

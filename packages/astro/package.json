@@ -27,6 +27,12 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./router": {
+      "types": "./dist/router.d.ts",
+      "import": "./dist/router.js",
+      "require": "./dist/router.cjs"
+    },
+    "./router/Link.astro": "./src/router/Link.astro",
     "./middleware": {
       "types": "./dist/middleware.d.ts",
       "import": "./dist/middleware.js",
@@ -34,7 +40,8 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "src/router/Link.astro"
   ],
   "scripts": {
     "build": "tsup",

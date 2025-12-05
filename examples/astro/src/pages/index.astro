@@ -1,6 +1,4 @@
 ---
-// This file handles the root path (/) and redirects are handled by middleware
-// but we need a file here for Astro to recognize the route.
-// In a static build, this would redirect. In 'server' mode, middleware handles it.
+import { defaultLocale } from '../i18n'
 ---
-<meta http-equiv="refresh" content="0;url=/en/" />
+<meta http-equiv="refresh" content={`0;url=/${defaultLocale}/`} />

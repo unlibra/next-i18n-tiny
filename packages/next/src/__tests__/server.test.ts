@@ -34,7 +34,6 @@ describe('Server version - define()', () => {
     })
 
     expect(i18n.Provider).toBeDefined()
-    expect(i18n.Link).toBeDefined()
     expect(i18n.server).toBeDefined()
     expect(i18n.client).toBeDefined()
   })

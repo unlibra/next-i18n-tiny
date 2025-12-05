@@ -9,9 +9,6 @@ import {
 } from './components'
 import type { NestedKeys } from '@i18n-tiny/core'
 
-// Re-export core utilities
-export { removeLocalePrefix } from '@i18n-tiny/core'
-
 // Re-export types for Provider
 export type { ProviderProps } from './components'
 

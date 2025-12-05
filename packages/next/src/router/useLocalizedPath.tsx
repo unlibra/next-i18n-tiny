@@ -46,26 +46,22 @@ export function useLocalizedPath() {
     (path: string) => {
       const cleanPath = path.startsWith('/') ? path : `/${path}`
 
-      // Avoid double prefixing
-      if (cleanPath.startsWith(`/${locale}/`) || cleanPath === `/${locale}`) {
+      // If path already has any locale prefix, return as-is (for language switching)
+      const hasLocalePrefix = locales.some(
+        (loc) => cleanPath.startsWith(`/${loc}/`) || cleanPath === `/${loc}`
+      )
+      if (hasLocalePrefix) {
         return cleanPath
       }
 
-      // For default locale
-      if (locale === defaultLocale) {
-        // Respect explicit locale prefix if present in the target path
-        if (cleanPath.startsWith(`/${defaultLocale}/`) || cleanPath === `/${defaultLocale}`) {
-          return cleanPath
-        }
-        // If current URL has explicit locale, preserve it in new links
-        if (!hasExplicitLocale) {
-          return cleanPath
-        }
+      // For default locale without explicit prefix in current URL
+      if (locale === defaultLocale && !hasExplicitLocale) {
+        return cleanPath
       }
 
       // Add locale prefix for non-default locales or explicit default locale
       return cleanPath === '/' ? `/${locale}` : `/${locale}${cleanPath}`
     },
-    [locale, defaultLocale, hasExplicitLocale]
+    [locale, defaultLocale, locales, hasExplicitLocale]
   )
 }

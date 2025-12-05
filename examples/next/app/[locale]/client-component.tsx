@@ -1,26 +1,74 @@
 'use client'
 
-import { useTranslations, Link, locales, useLocale } from '@/i18n'
-import { removeLocalePrefix } from '@i18n-tiny/core'
-import { usePathname } from 'next/navigation'
+import { useState, useMemo } from 'react'
+import { useTranslations, Link, useLocale, useMessages, locales, defaultLocale } from '@/i18n'
 
 export default function ClientComponent() {
   const t = useTranslations()
   const locale = useLocale()
-  const pathname = usePathname()
-  
-  const pathWithoutLocale = removeLocalePrefix(pathname, locales)
+  const messages = useMessages()
+  const [count, setCount] = useState(0)
+
+  // Check if browser language is in supported locales (excluding default)
+  const browserLangInLocales = useMemo(() => {
+    if (typeof navigator === 'undefined') return false
+    const browserLang = navigator.language.split('-')[0]
+    return (locales as readonly string[]).includes(browserLang) && browserLang !== defaultLocale
+  }, [])
+
+  const buttonStyle = (isActive: boolean) => ({
+    height: '2rem',
+    padding: '0 1rem',
+    fontSize: '1rem',
+    lineHeight: '2rem',
+    backgroundColor: isActive ? '#007bff' : '#6c757d',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    margin: '0.5rem',
+    textDecoration: 'none',
+    display: 'inline-block'
+  })
 
   return (
     <div>
-      <h2>Client Component</h2>
-      <p>Current locale: <strong>{locale}</strong></p>
-      <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-        {locales.map(l => (
-          <Link key={l} href={l === 'en' ? pathWithoutLocale : `/${l}${pathWithoutLocale}`}>
-            {l === locale ? `✓ ${l.toUpperCase()}` : l.toUpperCase()}
-          </Link>
-        ))}
+      <h2>{messages.home.clientComponent}</h2>
+
+      {/* Locale Display */}
+      <p>{t('common.currentLocale', { locale })}</p>
+
+      {/* Counter with Interpolation */}
+      <div style={{ marginTop: '1rem' }}>
+        <button onClick={() => setCount(c => c + 1)} style={{ padding: '0.5rem 1rem', marginRight: '0.5rem' }}>
+          {messages.home.increment}
+        </button>
+        <span>{t('home.counter', { count })}</span>
+      </div>
+
+      {/* Navigation - auto-localized */}
+      <div style={{ marginTop: '2rem' }}>
+        <Link href="/about" style={{ color: '#007bff', marginRight: '1rem' }}>
+          {messages.nav.about}
+        </Link>
+      </div>
+
+      {/* Language Buttons */}
+      <div style={{ marginTop: '2rem' }}>
+        <Link
+          href="/"
+          locale={browserLangInLocales ? 'en' : ''}
+          style={buttonStyle(locale === 'en')}
+        >
+          English
+        </Link>
+        <Link
+          href="/"
+          locale="ja"
+          style={buttonStyle(locale === 'ja')}
+        >
+          日本語
+        </Link>
       </div>
     </div>
   )

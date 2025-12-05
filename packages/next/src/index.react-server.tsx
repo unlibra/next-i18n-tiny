@@ -3,8 +3,8 @@
  * This version throws errors for client-only APIs
  */
 
-import { Link as I18nLink } from './router/Link'
-import { I18nProvider } from '@i18n-tiny/react/internal'
+import type { ReactNode } from 'react'
+import { I18nProvider as BaseProvider } from '@i18n-tiny/react/internal'
 import type { NestedKeys } from '@i18n-tiny/core'
 import { resolveMessage } from '@i18n-tiny/core'
 
@@ -38,6 +38,24 @@ export function define<
 
   type MessageType = Msgs[L[0]]
   type MessageKeys = NestedKeys<MessageType>
+
+  // Provider wrapper that binds locales and defaultLocale from closure
+  function Provider ({ locale, messages: msgs, children }: {
+    locale: string
+    messages: MessageType
+    children: ReactNode
+  }) {
+    return (
+      <BaseProvider
+        locale={locale}
+        messages={msgs}
+        defaultLocale={defaultLocale}
+        locales={locales}
+      >
+        {children}
+      </BaseProvider>
+    )
+  }
 
   // Server API - fully functional
   const server = {
@@ -86,8 +104,7 @@ export function define<
   }
 
   return {
-    Provider: I18nProvider,
-    Link: I18nLink,
+    Provider,
     locales,
     defaultLocale,
     server,

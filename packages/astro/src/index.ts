@@ -82,52 +82,14 @@ export function define<
     }
   }
 
-  /**
-   * Get localized path with locale prefix
-   * Useful for building links in Astro components
-   *
-   * @example
-   * ```astro
-   * <a href={i18n.getLocalizedPath('/about', Astro.currentLocale)}>About</a>
-   * ```
-   */
-  function getLocalizedPath(
-    path: string,
-    locale: string | undefined
-  ): string {
-    const resolvedLocale = locale ?? resolvedDefaultLocale
-    const cleanPath = path.startsWith('/') ? path : `/${path}`
-
-    // Avoid double prefixing
-    if (
-      cleanPath.startsWith(`/${resolvedLocale}/`) ||
-      cleanPath === `/${resolvedLocale}`
-    ) {
-      return cleanPath
-    }
-
-    // For default locale, no prefix needed
-    if (resolvedLocale === resolvedDefaultLocale) {
-      return cleanPath
-    }
-
-    // For non-default locales, add prefix
-    if (cleanPath === '/') {
-      return `/${resolvedLocale}`
-    }
-
-    return `/${resolvedLocale}${cleanPath}`
-  }
-
   return {
     locales: availableLocales,
     defaultLocale: resolvedDefaultLocale,
     getMessages,
-    getTranslations,
-    getLocalizedPath
+    getTranslations
   }
 }
 
 // Re-export core utilities
-export { detectLocale, removeLocalePrefix } from '@i18n-tiny/core'
+export { detectLocale } from '@i18n-tiny/core'
 export type { NestedKeys } from '@i18n-tiny/core'

@@ -23,6 +23,14 @@ export default defineConfig([
     },
     clean: true
   },
+  // Router entry
+  {
+    ...sharedConfig,
+    entry: {
+      router: 'src/router/index.ts'
+    },
+    clean: false
+  },
   // Middleware entry
   {
     ...sharedConfig,

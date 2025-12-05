@@ -12,6 +12,4 @@ export { useLocalizedPath } from './useLocalizedPath'
 
 // Utilities
 export { getLocalizedPath } from './getLocalizedPath'
-
-// Re-export from core
-export { removeLocalePrefix } from '@i18n-tiny/core'
+export { removeLocalePrefix } from './removeLocalePrefix'

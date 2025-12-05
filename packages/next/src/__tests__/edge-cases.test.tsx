@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { define } from '../index.react-client'
+import { Link } from '../router'
 
 const enMessages = {
   common: {
@@ -44,7 +45,7 @@ describe('Edge Cases & Bug Fixes', () => {
       const messages = await i18n.server.getMessages('ja')
       render(
         <i18n.Provider locale="ja" messages={messages}>
-          <i18n.Link href="/ja/about">About</i18n.Link>
+          <Link href="/ja/about">About</Link>
         </i18n.Provider>
       )
       const link = screen.getByText('About')
@@ -55,22 +56,22 @@ describe('Edge Cases & Bug Fixes', () => {
       const messages = await i18n.server.getMessages('ja')
       render(
         <i18n.Provider locale="ja" messages={messages}>
-          <i18n.Link href="about">About</i18n.Link>
+          <Link href="about">About</Link>
         </i18n.Provider>
       )
       const link = screen.getByText('About')
       expect(link.closest('a')).toHaveAttribute('href', '/ja/about')
     })
-    
+
     it('should handle root path correctly', async () => {
-        const messages = await i18n.server.getMessages('ja')
-        render(
-          <i18n.Provider locale="ja" messages={messages}>
-            <i18n.Link href="/">Home</i18n.Link>
-          </i18n.Provider>
-        )
-        const link = screen.getByText('Home')
-        expect(link.closest('a')).toHaveAttribute('href', '/ja')
+      const messages = await i18n.server.getMessages('ja')
+      render(
+        <i18n.Provider locale="ja" messages={messages}>
+          <Link href="/">Home</Link>
+        </i18n.Provider>
+      )
+      const link = screen.getByText('Home')
+      expect(link.closest('a')).toHaveAttribute('href', '/ja')
     })
   })
 })
