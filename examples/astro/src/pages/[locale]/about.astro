@@ -1,5 +1,5 @@
 ---
-import { locales, defaultLocale, getMessages } from '../../i18n'
+import { locales, getMessages } from '../../i18n'
 import Link from '@i18n-tiny/astro/router/Link.astro'
 
 export function getStaticPaths() {
@@ -20,7 +20,7 @@ const messages = getMessages(locale!)
     <p>{messages.about.description}</p>
 
     <div style="margin-top: 2rem;">
-      <Link href="/" locale={locale!} defaultLocale={defaultLocale} prefixDefault style="color: #007bff;">
+      <Link href="/" style="color: #007bff;">
         {messages.nav.home}
       </Link>
     </div>

@@ -1,7 +1,12 @@
 import { render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { define } from '../index.react-client'
 import { Link } from '../router'
+
+// Mock next/navigation
+vi.mock('next/navigation', () => ({
+  usePathname: vi.fn(() => '/')
+}))
 
 const enMessages = {
   common: {
@@ -41,11 +46,14 @@ describe('Edge Cases & Bug Fixes', () => {
   })
 
   describe('Link (Path Handling)', () => {
-    it('should not double prefix if href already contains locale', async () => {
+    it('should use explicit locale prop to generate path with prefix', async () => {
+      const { usePathname } = await import('next/navigation')
+      vi.mocked(usePathname).mockReturnValue('/home')
+
       const messages = await i18n.server.getMessages('ja')
       render(
         <i18n.Provider locale="ja" messages={messages}>
-          <Link href="/ja/about">About</Link>
+          <Link href="/about" locale="ja">About</Link>
         </i18n.Provider>
       )
       const link = screen.getByText('About')
@@ -53,6 +61,9 @@ describe('Edge Cases & Bug Fixes', () => {
     })
 
     it('should handle relative paths correctly by adding a leading slash', async () => {
+      const { usePathname } = await import('next/navigation')
+      vi.mocked(usePathname).mockReturnValue('/ja/home')
+
       const messages = await i18n.server.getMessages('ja')
       render(
         <i18n.Provider locale="ja" messages={messages}>
@@ -63,7 +74,10 @@ describe('Edge Cases & Bug Fixes', () => {
       expect(link.closest('a')).toHaveAttribute('href', '/ja/about')
     })
 
-    it('should handle root path correctly', async () => {
+    it('should handle root path correctly when URL has prefix', async () => {
+      const { usePathname } = await import('next/navigation')
+      vi.mocked(usePathname).mockReturnValue('/ja/home')
+
       const messages = await i18n.server.getMessages('ja')
       render(
         <i18n.Provider locale="ja" messages={messages}>
@@ -72,6 +86,20 @@ describe('Edge Cases & Bug Fixes', () => {
       )
       const link = screen.getByText('Home')
       expect(link.closest('a')).toHaveAttribute('href', '/ja')
+    })
+
+    it('should not add prefix when URL has no prefix', async () => {
+      const { usePathname } = await import('next/navigation')
+      vi.mocked(usePathname).mockReturnValue('/home')
+
+      const messages = await i18n.server.getMessages('ja')
+      render(
+        <i18n.Provider locale="ja" messages={messages}>
+          <Link href="/">Home</Link>
+        </i18n.Provider>
+      )
+      const link = screen.getByText('Home')
+      expect(link.closest('a')).toHaveAttribute('href', '/')
     })
   })
 })

@@ -1,7 +1,12 @@
 import { render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { define } from '../index.react-client'
 import { Link } from '../router'
+
+// Mock next/navigation
+vi.mock('next/navigation', () => ({
+  usePathname: vi.fn(() => '/')
+}))
 
 const enMessages = {
   common: {
@@ -184,7 +189,11 @@ describe('useLocale', () => {
 })
 
 describe('Link', () => {
-  it('should render Next.js Link with locale prefix', async () => {
+  it('should add locale prefix when current URL has prefix', async () => {
+    // Mock pathname with locale prefix
+    const { usePathname } = await import('next/navigation')
+    vi.mocked(usePathname).mockReturnValue('/ja/home')
+
     const messages = await i18n.server.getMessages('ja')
 
     render(
@@ -198,7 +207,11 @@ describe('Link', () => {
     expect(link.closest('a')).toHaveAttribute('href', '/ja/about')
   })
 
-  it('should not add prefix for default locale', async () => {
+  it('should not add prefix when current URL has no prefix', async () => {
+    // Mock pathname without locale prefix
+    const { usePathname } = await import('next/navigation')
+    vi.mocked(usePathname).mockReturnValue('/home')
+
     const messages = await i18n.server.getMessages('en')
 
     render(
@@ -207,6 +220,24 @@ describe('Link', () => {
       </i18n.Provider>
     )
 
+    const link = screen.getByText('About')
+    expect(link.closest('a')).toHaveAttribute('href', '/about')
+  })
+
+  it('should not add prefix for non-default locale when URL has no prefix', async () => {
+    // Mock pathname without locale prefix (Accept-Language detected locale)
+    const { usePathname } = await import('next/navigation')
+    vi.mocked(usePathname).mockReturnValue('/home')
+
+    const messages = await i18n.server.getMessages('ja')
+
+    render(
+      <i18n.Provider locale="ja" messages={messages}>
+        <Link href="/about">About</Link>
+      </i18n.Provider>
+    )
+
+    // Even with ja locale, URL has no prefix → links have no prefix
     const link = screen.getByText('About')
     expect(link.closest('a')).toHaveAttribute('href', '/about')
   })

@@ -1,5 +1,5 @@
 ---
-import { locales, defaultLocale, getTranslations } from '../../i18n'
+import { locales, getTranslations } from '../../i18n'
 import Link from '@i18n-tiny/astro/router/Link.astro'
 
 export function getStaticPaths() {
@@ -32,8 +32,8 @@ const buttonStyle = (isActive: boolean) => `
   </head>
   <body style="padding: 2rem; font-family: system-ui;">
     <nav style="margin-bottom: 2rem;">
-      <Link href="/" locale={locale!} defaultLocale={defaultLocale} prefixDefault style="margin-right: 1rem;">{t('nav.home')}</Link>
-      <Link href="/about" locale={locale!} defaultLocale={defaultLocale} prefixDefault>{t('nav.about')}</Link>
+      <Link href="/" style="margin-right: 1rem;">{t('nav.home')}</Link>
+      <Link href="/about">{t('nav.about')}</Link>
     </nav>
 
     <h1>{t('home.welcome')}</h1>
