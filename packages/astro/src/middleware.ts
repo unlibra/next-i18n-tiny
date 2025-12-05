@@ -46,10 +46,10 @@ export type I18nMiddlewareConfig = MiddlewareConfig
  * ```typescript
  * // src/middleware.ts
  * import { defineMiddleware } from 'astro/middleware'
- * import { middleware } from '@i18n-tiny/astro/middleware'
+ * import { create } from '@i18n-tiny/astro/middleware'
  *
  * export const onRequest = defineMiddleware(
- *   middleware({
+ *   create({
  *     locales: ['en', 'ja'],
  *     defaultLocale: 'en',
  *     strategy: 'redirect',
@@ -58,7 +58,7 @@ export type I18nMiddlewareConfig = MiddlewareConfig
  * )
  * ```
  */
-export function middleware(
+export function create(
   config: MiddlewareConfig
 ): MiddlewareHandler {
   const {

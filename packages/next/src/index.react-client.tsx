@@ -2,7 +2,8 @@
 
 import type { ReactNode } from 'react'
 
-import { I18nLink, useLocalizedPath } from './components'
+import { Link as I18nLink } from './router/Link'
+import { useLocalizedPath } from './router/useLocalizedPath'
 import {
   I18nProvider as BaseProvider,
   useMessages as baseUseMessages,
@@ -10,10 +11,7 @@ import {
   useLocale as baseUseLocale
 } from '@i18n-tiny/react/internal'
 import type { NestedKeys } from '@i18n-tiny/core'
-import { resolveMessage } from '@i18n-tiny/core'
-
-// Re-export core utilities
-export { removeLocalePrefix } from '@i18n-tiny/core'
+import { resolveMessage, removeLocalePrefix } from '@i18n-tiny/core'
 
 export interface I18nConfig<
   L extends readonly string[],
@@ -91,18 +89,12 @@ export function define<
 
     getLocalizedPath: (path: string, locale: string): string => {
       const cleanPath = path.startsWith('/') ? path : `/${path}`
-
-      // Avoid double prefixing
       if (cleanPath.startsWith(`/${locale}/`) || cleanPath === `/${locale}`) {
         return cleanPath
       }
-
-      // For default locale, no prefix needed
       if (locale === defaultLocale) {
         return cleanPath
       }
-
-      // Add locale prefix for non-default locales
       return cleanPath === '/' ? `/${locale}` : `/${locale}${cleanPath}`
     }
   }

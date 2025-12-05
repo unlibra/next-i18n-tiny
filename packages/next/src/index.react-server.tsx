@@ -3,13 +3,10 @@
  * This version throws errors for client-only APIs
  */
 
-import { I18nLink } from './components'
+import { Link as I18nLink } from './router/Link'
 import { I18nProvider } from '@i18n-tiny/react/internal'
 import type { NestedKeys } from '@i18n-tiny/core'
 import { resolveMessage } from '@i18n-tiny/core'
-
-// Re-export core utilities
-export { removeLocalePrefix } from '@i18n-tiny/core'
 
 export interface I18nConfig<
   L extends readonly string[],

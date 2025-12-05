@@ -30,17 +30,17 @@ async function addUseClientDirective(files: string[]) {
 }
 
 export default defineConfig([
-  // Components (Client Component)
+  // Router utilities (Client Components)
   {
     ...sharedConfig,
     entry: {
-      components: 'src/components.tsx'
+      'router/index': 'src/router/index.ts'
     },
     clean: true,
     async onSuccess () {
       await addUseClientDirective([
-        'dist/components.js',
-        'dist/components.cjs'
+        'dist/router/index.js',
+        'dist/router/index.cjs'
       ])
     }
   },
@@ -50,7 +50,6 @@ export default defineConfig([
     entry: {
       'index.react-client': 'src/index.react-client.tsx'
     },
-    external: [...sharedConfig.external, './components'],
     clean: false,
     async onSuccess () {
       await addUseClientDirective([
@@ -65,7 +64,6 @@ export default defineConfig([
     entry: {
       'index.react-server': 'src/index.react-server.tsx'
     },
-    external: [...sharedConfig.external, './components'],
     clean: false,
   },
   // Types export
@@ -76,11 +74,11 @@ export default defineConfig([
     },
     clean: false,
   },
-  // Middleware export
+  // Proxy export (middleware)
   {
     ...sharedConfig,
     entry: {
-      middleware: 'src/middleware.ts'
+      'proxy/index': 'src/proxy/index.ts'
     },
     external: ['next/server', '@i18n-tiny/core'],
     clean: false,

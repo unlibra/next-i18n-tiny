@@ -1,19 +1,31 @@
 'use client'
 
-import NextLink from 'next/link'
 import { usePathname } from 'next/navigation'
-import type { ComponentProps } from 'react'
 import { useCallback, useMemo } from 'react'
 
-// Import hooks for internal use
+// Import hooks from react/internal
 import {
   useLocale,
   useDefaultLocale,
   useLocales
 } from '@i18n-tiny/react/internal'
 
-// Next.js specific hooks
-export function useLocalizedPath () {
+/**
+ * Hook that returns a function to generate localized paths
+ *
+ * @example
+ * ```tsx
+ * import { useLocalizedPath } from '@i18n-tiny/next/router'
+ *
+ * function MyComponent() {
+ *   const getLocalizedPath = useLocalizedPath()
+ *   const aboutPath = getLocalizedPath('/about')  // '/ja/about' or '/about'
+ *
+ *   return <a href={aboutPath}>About</a>
+ * }
+ * ```
+ */
+export function useLocalizedPath() {
   const locale = useLocale()
   const defaultLocale = useDefaultLocale()
   const locales = useLocales()
@@ -56,16 +68,4 @@ export function useLocalizedPath () {
     },
     [locale, defaultLocale, hasExplicitLocale]
   )
-}
-
-// Next.js specific Link component
-export function I18nLink ({ href, ...props }: ComponentProps<typeof NextLink>) {
-  const getPath = useLocalizedPath()
-
-  // Handle both string and UrlObject
-  const localizedHref = typeof href === 'string'
-    ? getPath(href)
-    : { ...href, pathname: getPath(href.pathname ?? '') }
-
-  return <NextLink href={localizedHref} {...props} />
 }
