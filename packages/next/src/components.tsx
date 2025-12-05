@@ -2,85 +2,32 @@
 
 import NextLink from 'next/link'
 import { usePathname } from 'next/navigation'
-import type { ComponentProps, ReactNode } from 'react'
-import { createContext, useCallback, useContext, useMemo } from 'react'
-import { resolveMessage } from '@i18n-tiny/core'
+import type { ComponentProps } from 'react'
+import { useCallback, useMemo } from 'react'
 
-interface I18nContextValue {
-  locale: string
-  messages: Record<string, unknown>
-  defaultLocale: string
-  locales: readonly string[]
-}
+// Re-export everything from @i18n-tiny/react
+export {
+  I18nProvider,
+  useMessages,
+  useTranslations,
+  useLocale,
+  useLocales,
+  useDefaultLocale
+} from '@i18n-tiny/react'
+export type { ProviderProps, I18nProviderProps } from '@i18n-tiny/react'
 
-const I18nContext = createContext<I18nContextValue | undefined>(undefined)
+// Import hooks directly
+import {
+  useLocale as useLocaleBase,
+  useDefaultLocale as useDefaultLocaleBase,
+  useLocales as useLocalesBase
+} from '@i18n-tiny/react'
 
-function useI18n () {
-  const context = useContext(I18nContext)
-  if (!context) {
-    throw new Error('i18n hooks must be used within I18nProvider')
-  }
-  return context
-}
-
-export interface ProviderProps {
-  locale: string
-  messages: Record<string, unknown>
-  defaultLocale: string
-  locales: readonly string[]
-  children: ReactNode
-}
-
-/**
- * @deprecated Use ProviderProps instead
- */
-export type I18nProviderProps = ProviderProps
-
-export function I18nProvider ({
-  locale,
-  messages,
-  defaultLocale,
-  locales,
-  children
-}: ProviderProps) {
-  const value = useMemo(
-    () => ({
-      locale,
-      messages,
-      defaultLocale,
-      locales
-    }),
-    [locale, messages, defaultLocale, locales]
-  )
-
-  return (
-    <I18nContext.Provider value={value}>
-      {children}
-    </I18nContext.Provider>
-  )
-}
-
-export function useMessages<T = Record<string, unknown>> (): T {
-  return useI18n().messages as T
-}
-
-export function useTranslations<K extends string = string> (namespace?: string): (key: K) => string {
-  const { locale, messages } = useI18n()
-
-  return useCallback(
-    (key: K): string => {
-      return resolveMessage(messages, key, namespace, locale)
-    },
-    [namespace, messages, locale]
-  )
-}
-
-export function useLocale (): string {
-  return useI18n().locale
-}
-
+// Next.js specific hooks
 export function useLocalizedPath () {
-  const { locale, defaultLocale, locales } = useI18n()
+  const locale = useLocaleBase()
+  const defaultLocale = useDefaultLocaleBase()
+  const locales = useLocalesBase()
   const pathname = usePathname()
 
   // Check if current pathname has explicit locale prefix
@@ -88,7 +35,7 @@ export function useLocalizedPath () {
     () =>
       pathname
         ? locales.some(
-            (loc) => pathname.startsWith(`/${loc}/`) || pathname === `/${loc}`
+            (loc: string) => pathname.startsWith(`/${loc}/`) || pathname === `/${loc}`
           )
         : false,
     [pathname, locales]
@@ -122,10 +69,7 @@ export function useLocalizedPath () {
   )
 }
 
-export function useLocales (): readonly string[] {
-  return useI18n().locales
-}
-
+// Next.js specific Link component
 export function I18nLink ({ href, ...props }: ComponentProps<typeof NextLink>) {
   const getPath = useLocalizedPath()
 

@@ -51,7 +51,8 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@i18n-tiny/core": "workspace:*"
+    "@i18n-tiny/core": "workspace:*",
+    "@i18n-tiny/react": "workspace:*"
   },
   "peerDependencies": {
     "next": "^15.0.0 || ^16.0.0",

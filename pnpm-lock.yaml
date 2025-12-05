@@ -72,6 +72,9 @@ importers:
       '@i18n-tiny/core':
         specifier: workspace:*
         version: link:../core
+      '@i18n-tiny/react':
+        specifier: workspace:*
+        version: link:../react
     devDependencies:
       '@testing-library/jest-dom':
         specifier: ^6.9.1
@@ -94,6 +97,40 @@ importers:
       next:
         specifier: ^16.0.0
         version: 16.0.7(@babel/core@7.28.5)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+      react:
+        specifier: ^19.0.0
+        version: 19.2.1
+      tsup:
+        specifier: ^8.3.5
+        version: 8.5.1(postcss@8.5.6)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.15
+        version: 4.0.15(@types/node@24.10.1)(happy-dom@20.0.11)
+
+  packages/react:
+    dependencies:
+      '@i18n-tiny/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      '@testing-library/jest-dom':
+        specifier: ^6.9.1
+        version: 6.9.1
+      '@testing-library/react':
+        specifier: ^16.3.0
+        version: 16.3.0(@testing-library/dom@10.4.1)(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+      '@types/react':
+        specifier: ^19.2.4
+        version: 19.2.7
+      '@vitejs/plugin-react':
+        specifier: ^5.1.1
+        version: 5.1.1(vite@7.2.6(@types/node@24.10.1))
+      happy-dom:
+        specifier: ^20.0.11
+        version: 20.0.11
       react:
         specifier: ^19.0.0
         version: 19.2.1

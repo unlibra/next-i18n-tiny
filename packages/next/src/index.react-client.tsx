@@ -4,16 +4,22 @@ import type { ReactNode } from 'react'
 
 import {
   I18nLink,
-  I18nProvider as BaseProvider,
-  useLocale,
-  useMessages as baseUseMessages,
-  useTranslations as baseUseTranslations
+  useLocale
 } from './components'
+import { I18nProvider as BaseProvider } from '@i18n-tiny/react'
 import type { NestedKeys } from '@i18n-tiny/core'
 import { resolveMessage } from '@i18n-tiny/core'
 
 // Re-export core utilities
 export { removeLocalePrefix } from '@i18n-tiny/core'
+
+// Re-export from @i18n-tiny/react
+export {
+  useMessages,
+  useTranslations,
+  useLocales,
+  useDefaultLocale
+} from '@i18n-tiny/react'
 
 export interface I18nConfig<
   L extends readonly string[],
@@ -110,10 +116,14 @@ export function define<
 
   // Type-safe wrappers for client hooks with automatic inference
   function useMessages (): MessageType {
+    // Import inside the function to avoid calling hooks at module level
+    const { useMessages: baseUseMessages } = require('@i18n-tiny/react')
     return baseUseMessages<MessageType>()
   }
 
   function useTranslations (namespace?: string): (key: MessageKeys) => string {
+    // Import inside the function to avoid calling hooks at module level
+    const { useTranslations: baseUseTranslations } = require('@i18n-tiny/react')
     return baseUseTranslations<MessageKeys>(namespace)
   }
 
