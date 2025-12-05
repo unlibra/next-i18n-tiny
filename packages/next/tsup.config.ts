@@ -75,5 +75,14 @@ export default defineConfig([
       types: 'src/types.ts'
     },
     clean: false,
+  },
+  // Middleware export
+  {
+    ...sharedConfig,
+    entry: {
+      middleware: 'src/middleware.ts'
+    },
+    external: ['next/server', '@i18n-tiny/core'],
+    clean: false,
   }
 ])
