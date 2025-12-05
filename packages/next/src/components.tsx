@@ -1,6 +1,7 @@
 'use client'
 
 import NextLink from 'next/link'
+import { usePathname } from 'next/navigation'
 import type { ComponentProps, ReactNode } from 'react'
 import { createContext, useCallback, useContext, useMemo } from 'react'
 import { resolveMessage } from '@i18n-tiny/core'
@@ -74,13 +75,22 @@ export function useLocale (): string {
 }
 
 export function useLocalizedPath () {
-  const { locale, defaultLocale } = useI18n()
+  const { locale, defaultLocale, locales } = useI18n()
+  const pathname = usePathname()
+
+  // Check if current pathname has explicit locale prefix
+  const hasExplicitLocale = useMemo(
+    () =>
+      pathname
+        ? locales.some(
+            (loc) => pathname.startsWith(`/${loc}/`) || pathname === `/${loc}`
+          )
+        : false,
+    [pathname, locales]
+  )
+
   return useCallback(
     (path: string) => {
-      if (locale === defaultLocale) {
-        return path
-      }
-
       const cleanPath = path.startsWith('/') ? path : `/${path}`
 
       // Avoid double prefixing
@@ -88,13 +98,22 @@ export function useLocalizedPath () {
         return cleanPath
       }
 
-      if (cleanPath === '/') {
-        return `/${locale}`
+      // For default locale
+      if (locale === defaultLocale) {
+        // Respect explicit locale prefix if present in the target path
+        if (cleanPath.startsWith(`/${defaultLocale}/`) || cleanPath === `/${defaultLocale}`) {
+          return cleanPath
+        }
+        // If current URL has explicit locale, preserve it in new links
+        if (!hasExplicitLocale) {
+          return cleanPath
+        }
       }
 
-      return `/${locale}${cleanPath}`
+      // Add locale prefix for non-default locales or explicit default locale
+      return cleanPath === '/' ? `/${locale}` : `/${locale}${cleanPath}`
     },
-    [locale, defaultLocale]
+    [locale, defaultLocale, hasExplicitLocale]
   )
 }
 
