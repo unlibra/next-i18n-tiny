@@ -1,0 +1,35 @@
+---
+import { i18n } from '../../i18n';
+
+export function getStaticPaths() {
+  return i18n.locales.map(locale => ({ params: { locale } }));
+}
+
+const { locale } = Astro.params;
+const t = i18n.getTranslations(locale);
+const currentPath = Astro.url.pathname;
+
+// Simple language switcher logic
+const switchUrl = locale === 'en' 
+  ? currentPath.replace(/^\/en/, '/ja') 
+  : currentPath.replace(/^\/ja/, '/en');
+---
+
+<html lang={locale}>
+  <head>
+    <meta charset="utf-8" />
+    <title>{t('common.title')}</title>
+  </head>
+  <body style="padding: 2rem; font-family: system-ui;">
+    <h1>{t('home.welcome')}</h1>
+    <p>{t('common.description')}</p>
+    
+    <hr style="margin: 2rem 0;" />
+    
+    <p>Current locale: <strong>{locale}</strong></p>
+    
+    <a href={switchUrl}>
+      {t('home.switch')} ({locale === 'en' ? 'JA' : 'EN'})
+    </a>
+  </body>
+</html>
