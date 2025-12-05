@@ -16,18 +16,14 @@ export {
 } from '@i18n-tiny/react'
 export type { ProviderProps, I18nProviderProps } from '@i18n-tiny/react'
 
-// Import hooks directly
-import {
-  useLocale as useLocaleBase,
-  useDefaultLocale as useDefaultLocaleBase,
-  useLocales as useLocalesBase
-} from '@i18n-tiny/react'
+// Import hooks for internal use
+import { useLocale, useDefaultLocale, useLocales } from '@i18n-tiny/react'
 
 // Next.js specific hooks
 export function useLocalizedPath () {
-  const locale = useLocaleBase()
-  const defaultLocale = useDefaultLocaleBase()
-  const locales = useLocalesBase()
+  const locale = useLocale()
+  const defaultLocale = useDefaultLocale()
+  const locales = useLocales()
   const pathname = usePathname()
 
   // Check if current pathname has explicit locale prefix
@@ -35,7 +31,7 @@ export function useLocalizedPath () {
     () =>
       pathname
         ? locales.some(
-            (loc: string) => pathname.startsWith(`/${loc}/`) || pathname === `/${loc}`
+            (loc) => pathname.startsWith(`/${loc}/`) || pathname === `/${loc}`
           )
         : false,
     [pathname, locales]

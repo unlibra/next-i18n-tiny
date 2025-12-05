@@ -23,7 +23,7 @@ export {
   useLocales,
   useDefaultLocale
 } from './components'
-export type { ProviderProps } from './components'
+export type { ProviderProps, I18nProviderProps } from './components'
 
 export interface I18nConfig<
   L extends readonly string[],

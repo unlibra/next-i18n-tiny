@@ -2,11 +2,12 @@
 
 import type { ReactNode } from 'react'
 
+import { I18nLink, useLocale } from './components'
 import {
-  I18nLink,
-  useLocale
-} from './components'
-import { I18nProvider as BaseProvider } from '@i18n-tiny/react'
+  I18nProvider as BaseProvider,
+  useMessages as baseUseMessages,
+  useTranslations as baseUseTranslations
+} from '@i18n-tiny/react'
 import type { NestedKeys } from '@i18n-tiny/core'
 import { resolveMessage } from '@i18n-tiny/core'
 
@@ -93,11 +94,31 @@ export function define<
       return (key: MessageKeys): string => {
         return resolveMessage(msgs, key, namespace, locale)
       }
-    }
+    },
+
+    getLocalizedPath: (path: string, locale: string): string => {
+      const cleanPath = path.startsWith('/') ? path : `/${path}`
+
+      // Avoid double prefixing
+      if (cleanPath.startsWith(`/${locale}/`) || cleanPath === `/${locale}`) {
+        return cleanPath
+      }
+
+      // For default locale, no prefix needed
+      if (locale === defaultLocale) {
+        return cleanPath
+      }
+
+      // Add locale prefix for non-default locales
+      return cleanPath === '/' ? `/${locale}` : `/${locale}${cleanPath}`
+    },
+
+    locales,
+    defaultLocale
   }
 
   // Provider wrapper that only requires locale and messages
-  function Provider ({ locale, messages, children }: {
+  function Provider ({ locale, messages: msgs, children }: {
     locale: string
     messages: MessageType
     children: ReactNode
@@ -105,7 +126,7 @@ export function define<
     return (
       <BaseProvider
         locale={locale}
-        messages={messages}
+        messages={msgs}
         defaultLocale={defaultLocale}
         locales={locales}
       >
@@ -116,14 +137,10 @@ export function define<
 
   // Type-safe wrappers for client hooks with automatic inference
   function useMessages (): MessageType {
-    // Import inside the function to avoid calling hooks at module level
-    const { useMessages: baseUseMessages } = require('@i18n-tiny/react')
     return baseUseMessages<MessageType>()
   }
 
   function useTranslations (namespace?: string): (key: MessageKeys) => string {
-    // Import inside the function to avoid calling hooks at module level
-    const { useTranslations: baseUseTranslations } = require('@i18n-tiny/react')
     return baseUseTranslations<MessageKeys>(namespace)
   }
 
