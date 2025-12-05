@@ -20,20 +20,36 @@ export function resolveMessage (
   namespace?: string,
   locale?: string
 ): string {
-  const fullKey = namespace ? `${String(namespace)}.${key}` : key
-  const keys = fullKey.split('.')
   let obj: unknown = messages
 
-  for (const k of keys) {
-    if (obj && typeof obj === 'object' && k in obj) {
-      obj = (obj as Record<string, unknown>)[k]
-    } else {
-      obj = undefined
-      break
+  // Helper to traverse path segments
+  const traverse = (path: string) => {
+    const keys = path.split('.')
+    for (const k of keys) {
+      if (obj && typeof obj === 'object' && k in obj) {
+        obj = (obj as Record<string, unknown>)[k]
+      } else {
+        obj = undefined
+        break
+      }
     }
   }
 
+  // Traverse namespace first if present
+  if (namespace) {
+    traverse(namespace)
+  }
+
+  // Traverse key if we haven't failed yet
+  if (obj !== undefined) {
+    traverse(key)
+  }
+
+  // Helper to construct full key only when needed (lazy evaluation)
+  const getFullKey = () => (namespace ? `${namespace}.${key}` : key)
+
   if (obj === undefined) {
+    const fullKey = getFullKey()
     if (process.env.NODE_ENV === 'development' && locale) {
       console.warn(`[i18n] Missing key: "${fullKey}" in locale "${locale}"`)
     }
@@ -42,6 +58,7 @@ export function resolveMessage (
 
   // Prevent returning "[object Object]" if the key points to a nested object
   if (typeof obj === 'object' && obj !== null) {
+    const fullKey = getFullKey()
     if (process.env.NODE_ENV === 'development' && locale) {
       console.warn(`[i18n] Key "${fullKey}" points to an object in locale "${locale}". Returning key instead.`)
     }
