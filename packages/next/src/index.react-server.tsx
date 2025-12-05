@@ -7,6 +7,9 @@ import { I18nLink, I18nProvider } from './components'
 import type { NestedKeys } from '@i18n-tiny/core'
 import { resolveMessage } from '@i18n-tiny/core'
 
+// Re-export core utilities
+export { removeLocalePrefix } from '@i18n-tiny/core'
+
 export interface I18nConfig<
   L extends readonly string[],
   M extends Record<string, any>, // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -33,7 +36,7 @@ export function define<
   M extends Record<string, any>, // eslint-disable-line @typescript-eslint/no-explicit-any
   Msgs extends Record<L[number], M>
 > (config: { locales: L; defaultLocale: L[number]; messages: Msgs }) {
-  const { messages } = config
+  const { locales, defaultLocale, messages } = config
 
   type MessageType = Msgs[L[0]]
   type MessageKeys = NestedKeys<MessageType>
@@ -55,7 +58,27 @@ export function define<
       return (key: MessageKeys): string => {
         return resolveMessage(msgs, key, namespace, locale)
       }
-    }
+    },
+
+    getLocalizedPath: (path: string, locale: string): string => {
+      const cleanPath = path.startsWith('/') ? path : `/${path}`
+
+      // Avoid double prefixing
+      if (cleanPath.startsWith(`/${locale}/`) || cleanPath === `/${locale}`) {
+        return cleanPath
+      }
+
+      // For default locale, no prefix needed
+      if (locale === defaultLocale) {
+        return cleanPath
+      }
+
+      // Add locale prefix for non-default locales
+      return cleanPath === '/' ? `/${locale}` : `/${locale}${cleanPath}`
+    },
+
+    locales,
+    defaultLocale
   }
 
   // Client API - all throw errors on server

@@ -6,7 +6,7 @@
 
 The simplest i18n library for modern frameworks. Type-safe, zero-dependency, minimal setup.
 
-Currently supports: **Next.js** (with more frameworks coming)
+Currently supports: **Next.js** | **Astro**
 
 ## Quick Start
 
@@ -33,6 +33,29 @@ export const i18n = define({
 
 [Full documentation →](./packages/next/README.md)
 
+### Astro
+
+[![npm version](https://img.shields.io/npm/v/@i18n-tiny/astro.svg)](https://www.npmjs.com/package/@i18n-tiny/astro)
+[![npm downloads](https://img.shields.io/npm/dm/@i18n-tiny/astro.svg)](https://www.npmjs.com/package/@i18n-tiny/astro)
+
+```typescript
+import { define } from '@i18n-tiny/astro'
+import enMessages from './messages/en'
+import jaMessages from './messages/ja'
+
+export const i18n = define({
+  locales: ['en', 'ja'] as const,
+  defaultLocale: 'en',
+  messages: { en: enMessages, ja: jaMessages }
+})
+
+// In .astro files
+const messages = i18n.getMessages(Astro.currentLocale)
+const t = i18n.getTranslations(Astro.currentLocale)
+```
+
+[Full documentation →](./packages/astro/README.md)
+
 ## Packages
 
 ### [@i18n-tiny/next](./packages/next)
@@ -47,11 +70,23 @@ Type-safe i18n library for Next.js App Router with React Server Components suppo
 npm install @i18n-tiny/next
 ```
 
+### [@i18n-tiny/astro](./packages/astro)
+
+[![npm version](https://img.shields.io/npm/v/@i18n-tiny/astro.svg)](https://www.npmjs.com/package/@i18n-tiny/astro)
+
+Type-safe i18n library for Astro with middleware support.
+
+[Documentation →](./packages/astro/README.md)
+
+```bash
+npm install @i18n-tiny/astro
+```
+
 ## Features
 
 - **Type-safe**: Full TypeScript support with automatic type inference
 - **Zero dependencies**: No external i18n libraries needed
-- **Framework support**: Next.js (with more frameworks coming)
+- **Framework support**: Next.js, Astro
 - **Small**: Minimal bundle size
 - **No global state**: Pure function factory pattern
 

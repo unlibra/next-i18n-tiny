@@ -23,7 +23,7 @@ function useI18n () {
   return context
 }
 
-export interface I18nProviderProps {
+export interface ProviderProps {
   locale: string
   messages: Record<string, unknown>
   defaultLocale: string
@@ -31,13 +31,18 @@ export interface I18nProviderProps {
   children: ReactNode
 }
 
+/**
+ * @deprecated Use ProviderProps instead
+ */
+export type I18nProviderProps = ProviderProps
+
 export function I18nProvider ({
   locale,
   messages,
   defaultLocale,
   locales,
   children
-}: I18nProviderProps) {
+}: ProviderProps) {
   const value = useMemo(
     () => ({
       locale,

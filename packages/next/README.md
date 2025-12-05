@@ -377,6 +377,7 @@ Create a component to switch between languages while preserving the current path
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { removeLocalePrefix } from '@i18n-tiny/core'
 
 // Import i18n settings and hooks
 import { defaultLocale, locales, useLocale } from '@/i18n'
@@ -391,17 +392,11 @@ export function LanguageSwitcher () {
   const locale = useLocale() // Get the current active locale
   const pathname = usePathname() // Get the current path without locale prefix (e.g., /about)
 
-  // Helper function to get the base path, removing the current locale prefix
-  const getBasePath = () => {
-    const localePrefix = new RegExp(`^/${locale}(/|$)`)
-    const basePath = pathname.replace(localePrefix, '/')
-    return basePath === '' ? '/' : basePath
-  }
+  // Remove locale prefix from current path
+  const basePath = removeLocalePrefix(pathname, locales)
 
   // Generate the path for a new locale
   const getLocalizedPath = (newLocale: string) => {
-    const basePath = getBasePath()
-
     // If the new locale is the default, remove the locale prefix from the path
     if (newLocale === defaultLocale) {
       return basePath

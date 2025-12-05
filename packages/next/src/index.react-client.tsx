@@ -12,6 +12,9 @@ import {
 import type { NestedKeys } from '@i18n-tiny/core'
 import { resolveMessage } from '@i18n-tiny/core'
 
+// Re-export core utilities
+export { removeLocalePrefix } from '@i18n-tiny/core'
+
 export interface I18nConfig<
   L extends readonly string[],
   M extends Record<string, any>, // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -118,7 +121,9 @@ export function define<
   const client = {
     useMessages,
     useTranslations,
-    useLocale
+    useLocale,
+    locales,
+    defaultLocale
   }
 
   return {
