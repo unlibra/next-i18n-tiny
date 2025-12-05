@@ -18,25 +18,30 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install
 
       - name: Type check
-        run: npm run type-check
+        run: pnpm type-check
 
       - name: Lint
-        run: npm run lint
+        run: pnpm lint
 
       - name: Test
-        run: npm run test
+        run: pnpm test
 
       - name: Build
-        run: npm run build
+        run: pnpm build
 
   # Job to verify that all tests passed
   # Use this job name in Branch Protection Rules
