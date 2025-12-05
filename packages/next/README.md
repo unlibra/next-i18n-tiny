@@ -295,6 +295,46 @@ export default function Layout({ children, params }) {
 }
 ```
 
+### Automatic Language Detection
+
+Detect user's preferred language from the `Accept-Language` header and redirect to the appropriate locale.
+
+```typescript
+// proxy.ts (Next.js 16+) or middleware.ts
+import type { NextRequest } from 'next/server'
+import { NextResponse } from 'next/server'
+import { detectLocale } from '@i18n-tiny/core'
+import { locales } from '@/i18n'
+
+export function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl
+
+  // Check if the pathname already has a locale
+  const hasLocale = locales.some(
+    (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
+  )
+
+  if (hasLocale) return NextResponse.next()
+
+  // Detect user's preferred language
+  const acceptLanguage = request.headers.get('accept-language')
+  const detectedLocale = detectLocale(acceptLanguage, locales) ?? 'en'
+
+  // Redirect to the detected locale
+  return NextResponse.redirect(new URL(`/${detectedLocale}${pathname}`, request.url))
+}
+
+export const config = {
+  matcher: ['/((?!api|_next|.*\\..*).*)']
+}
+```
+
+**How it works:**
+- Parses `Accept-Language` header (e.g., `"ja,en-US;q=0.9,en;q=0.8"`)
+- Returns the highest priority locale that matches your supported locales
+- Falls back to your specified default if no match is found
+- **Maintains SSG** - only root path (`/`) is redirected, all locale pages remain static
+
 ### Language Switcher
 
 Create a component to switch between languages while preserving the current path.
