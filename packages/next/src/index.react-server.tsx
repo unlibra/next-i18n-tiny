@@ -3,7 +3,8 @@
  * This version throws errors for client-only APIs
  */
 
-import { I18nLink, I18nProvider } from './components'
+import { I18nLink } from './components'
+import { I18nProvider } from '@i18n-tiny/react/internal'
 import type { NestedKeys } from '@i18n-tiny/core'
 import { resolveMessage } from '@i18n-tiny/core'
 
@@ -75,10 +76,7 @@ export function define<
 
       // Add locale prefix for non-default locales
       return cleanPath === '/' ? `/${locale}` : `/${locale}${cleanPath}`
-    },
-
-    locales,
-    defaultLocale
+    }
   }
 
   // Client API - all throw errors on server
@@ -92,6 +90,8 @@ export function define<
   return {
     Provider: I18nProvider,
     Link: I18nLink,
+    locales,
+    defaultLocale,
     server,
     client
   }

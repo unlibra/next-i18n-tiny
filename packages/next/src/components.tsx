@@ -5,19 +5,12 @@ import { usePathname } from 'next/navigation'
 import type { ComponentProps } from 'react'
 import { useCallback, useMemo } from 'react'
 
-// Re-export everything from @i18n-tiny/react
-export {
-  I18nProvider,
-  useMessages,
-  useTranslations,
-  useLocale,
-  useLocales,
-  useDefaultLocale
-} from '@i18n-tiny/react'
-export type { ProviderProps, I18nProviderProps } from '@i18n-tiny/react'
-
 // Import hooks for internal use
-import { useLocale, useDefaultLocale, useLocales } from '@i18n-tiny/react'
+import {
+  useLocale,
+  useDefaultLocale,
+  useLocales
+} from '@i18n-tiny/react/internal'
 
 // Next.js specific hooks
 export function useLocalizedPath () {

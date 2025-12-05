@@ -2,25 +2,18 @@
 
 import type { ReactNode } from 'react'
 
-import { I18nLink, useLocale } from './components'
+import { I18nLink } from './components'
 import {
   I18nProvider as BaseProvider,
   useMessages as baseUseMessages,
-  useTranslations as baseUseTranslations
-} from '@i18n-tiny/react'
+  useTranslations as baseUseTranslations,
+  useLocale as baseUseLocale
+} from '@i18n-tiny/react/internal'
 import type { NestedKeys } from '@i18n-tiny/core'
 import { resolveMessage } from '@i18n-tiny/core'
 
 // Re-export core utilities
 export { removeLocalePrefix } from '@i18n-tiny/core'
-
-// Re-export from @i18n-tiny/react
-export {
-  useMessages,
-  useTranslations,
-  useLocales,
-  useDefaultLocale
-} from '@i18n-tiny/react'
 
 export interface I18nConfig<
   L extends readonly string[],
@@ -111,10 +104,7 @@ export function define<
 
       // Add locale prefix for non-default locales
       return cleanPath === '/' ? `/${locale}` : `/${locale}${cleanPath}`
-    },
-
-    locales,
-    defaultLocale
+    }
   }
 
   // Provider wrapper that only requires locale and messages
@@ -144,18 +134,22 @@ export function define<
     return baseUseTranslations<MessageKeys>(namespace)
   }
 
+  function useLocale (): string {
+    return baseUseLocale()
+  }
+
   // Client API (hooks only)
   const client = {
     useMessages,
     useTranslations,
-    useLocale,
-    locales,
-    defaultLocale
+    useLocale
   }
 
   return {
     Provider,
     Link: I18nLink,
+    locales,
+    defaultLocale,
     server,
     client
   }

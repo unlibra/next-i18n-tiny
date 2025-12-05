@@ -5,25 +5,15 @@ import {
   I18nProvider as BaseProvider,
   useMessages as baseUseMessages,
   useTranslations as baseUseTranslations,
-  useLocale,
-  useLocales,
-  useDefaultLocale
+  useLocale as baseUseLocale
 } from './components'
 import type { NestedKeys } from '@i18n-tiny/core'
 
 // Re-export core utilities
 export { removeLocalePrefix } from '@i18n-tiny/core'
 
-// Re-export components and hooks for direct use
-export {
-  I18nProvider,
-  useMessages,
-  useTranslations,
-  useLocale,
-  useLocales,
-  useDefaultLocale
-} from './components'
-export type { ProviderProps, I18nProviderProps } from './components'
+// Re-export types for Provider
+export type { ProviderProps } from './components'
 
 export interface I18nConfig<
   L extends readonly string[],
@@ -108,13 +98,15 @@ export function define<
     return baseUseTranslations<MessageKeys>(namespace)
   }
 
+  function useLocale (): string {
+    return baseUseLocale()
+  }
+
   return {
     Provider,
     useMessages,
     useTranslations,
     useLocale,
-    useLocales,
-    useDefaultLocale,
     locales,
     defaultLocale,
     messages
