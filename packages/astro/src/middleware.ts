@@ -4,7 +4,7 @@
  * Middleware helpers for Astro i18n routing
  */
 
-import { detectLocale } from '@i18n-tiny/core'
+import { detectLocale } from '@i18n-tiny/core/middleware'
 import type { MiddlewareHandler } from 'astro'
 
 // Common static file extensions to skip in middleware

@@ -8,18 +8,11 @@ import {
   useTranslations as baseUseTranslations,
   useLocale as baseUseLocale
 } from '@i18n-tiny/react/internal'
-import type { NestedKeys } from '@i18n-tiny/core'
-import { resolveMessage } from '@i18n-tiny/core'
+import type { NestedKeys } from '@i18n-tiny/core/internal'
+import { resolveMessage } from '@i18n-tiny/core/internal'
 
-export interface I18nConfig<
-  L extends readonly string[],
-  M extends Record<string, any>, // eslint-disable-line @typescript-eslint/no-explicit-any
-  Msgs extends Record<L[number], M> = Record<L[number], M>
-> {
-  locales: L
-  defaultLocale: L[number]
-  messages: Msgs
-}
+// Re-export DefineConfig for users who want to type their config
+export type { DefineConfig } from '@i18n-tiny/core'
 
 /**
  * Define i18n instance with automatic type inference
@@ -83,17 +76,6 @@ export function define<
       return (key: MessageKeys, vars?: Record<string, string | number>): string => {
         return resolveMessage(msgs, key, namespace, locale, vars)
       }
-    },
-
-    getLocalizedPath: (path: string, locale: string): string => {
-      const cleanPath = path.startsWith('/') ? path : `/${path}`
-      if (cleanPath.startsWith(`/${locale}/`) || cleanPath === `/${locale}`) {
-        return cleanPath
-      }
-      if (locale === defaultLocale) {
-        return cleanPath
-      }
-      return cleanPath === '/' ? `/${locale}` : `/${locale}${cleanPath}`
     }
   }
 

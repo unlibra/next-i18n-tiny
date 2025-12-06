@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react'
 import { createContext, useCallback, useContext, useMemo } from 'react'
-import { resolveMessage } from '@i18n-tiny/core'
+import { resolveMessage } from '@i18n-tiny/core/internal'
 
 interface I18nContextValue {
   locale: string

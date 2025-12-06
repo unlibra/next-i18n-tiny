@@ -18,7 +18,7 @@ Inspired by next-intl, designed for simplicity and type safety.
 - **Minimal SSG**: Works seamlessly with Astro's static site generation
 - **Simple API**: Single configuration, minimal boilerplate
 - **Small**: Minimal bundle size
-- **Flexible**: Use with Astro's built-in i18n or standalone
+- **Flexible**: Use with Astro's built-in i18n or standalone middleware
 
 ## Installation
 
@@ -32,33 +32,24 @@ yarn add @i18n-tiny/astro
 
 ## Usage
 
-Choose your preferred setup:
+### Project Structure
 
-- **Option 1**: With Astro's built-in i18n (Recommended for Astro 4.0+) - Lighter bundle
-- **Option 2**: Standalone (Works with Astro 3.0+) - More customizable
-
-### Option 1: With Astro's Built-in i18n (Recommended)
-
-Use Astro's official i18n routing with @i18n-tiny/astro for translations.
-
-**Step 1: Configure Astro i18n**
-
-```javascript
-// astro.config.mjs
-import { defineConfig } from 'astro/config'
-
-export default defineConfig({
-  i18n: {
-    defaultLocale: 'en',
-    locales: ['en', 'ja'],
-    routing: {
-      prefixDefaultLocale: false
-    }
-  }
-})
+```
+src/
+├── pages/
+│   └── [locale]/
+│       ├── index.astro
+│       └── about.astro
+├── messages/
+│   ├── en.ts
+│   └── ja.ts
+├── i18n.ts
+└── middleware.ts
 ```
 
-**Step 2: Create message files**
+### Minimal Setup
+
+**1. Create message files**
 
 ```typescript
 // src/messages/en.ts
@@ -88,7 +79,7 @@ export default {
 }
 ```
 
-**Step 3: Define i18n instance**
+**2. Define i18n instance**
 
 ```typescript
 // src/i18n.ts
@@ -96,30 +87,45 @@ import { define } from '@i18n-tiny/astro'
 import enMessages from './messages/en'
 import jaMessages from './messages/ja'
 
-// No need to specify locales/defaultLocale - Astro handles routing
-export const i18n = define({
+export const locales = ['en', 'ja'] as const
+export type Locale = (typeof locales)[number]
+export const defaultLocale: Locale = 'en'
+
+export const { getMessages, getTranslations } = define({
+  locales,
+  defaultLocale,
   messages: { en: enMessages, ja: jaMessages }
 })
-
-// Re-export utilities for convenience
-export { removeLocalePrefix } from '@i18n-tiny/astro'
 ```
 
-**Step 4: Use in components**
+**3. Setup middleware**
+
+```typescript
+// src/middleware.ts
+import { defineMiddleware } from 'astro/middleware'
+import { create } from '@i18n-tiny/astro/middleware'
+import { locales, defaultLocale } from './i18n'
+
+export const onRequest = defineMiddleware(
+  create({
+    locales,
+    defaultLocale
+  })
+)
+```
+
+**4. Use in pages**
 
 ```astro
 ---
 // src/pages/[locale]/index.astro
+import { getMessages, getTranslations } from '../../i18n'
+import Link from '@i18n-tiny/astro/router/Link.astro'
 
-import { i18n } from '../../i18n'
+const { locale } = Astro.params
 
-// Astro.currentLocale is available in Astro 4.0+
-const locale = Astro.currentLocale
-
-/* Direct object access */
-const messages = i18n.getMessages(locale)
-/* Function call */
-const t = i18n.getTranslations(locale)
+const messages = getMessages(locale)
+const t = getTranslations(locale)
 ---
 
 <html lang={locale}>
@@ -133,208 +139,234 @@ const t = i18n.getTranslations(locale)
     {/*    ^^^^^^^^^^^^^^^^^^ Auto-complete */}
 
     <nav>
-      <a href={i18n.getLocalizedPath('/', locale)}>{t('nav.home')}</a>
-      <a href={i18n.getLocalizedPath('/about', locale)}>{t('nav.about')}</a>
+      <Link href="/">{t('nav.home')}</Link>
+      <Link href="/about">{t('nav.about')}</Link>
     </nav>
   </body>
 </html>
 ```
 
-### Option 2: Standalone (Works with any Astro version)
-
-Complete i18n solution with built-in routing middleware.
-
-**Step 1: Create message files**
-
-Same as Option 1.
-
-**Step 2: Define i18n instance**
-
-```typescript
-// src/i18n.ts
-import { define } from '@i18n-tiny/astro'
-import enMessages from './messages/en'
-import jaMessages from './messages/ja'
-
-export const locales = ['en', 'ja'] as const
-export type Locale = (typeof locales)[number]
-export const defaultLocale: Locale = 'en'
-
-export const i18n = define({
-  locales,
-  defaultLocale,
-  messages: { en: enMessages, ja: jaMessages }
-})
-```
-
-**Step 3: Setup middleware**
-
-```typescript
-// src/middleware.ts
-import { defineMiddleware } from 'astro/middleware'
-import { middleware } from '@i18n-tiny/astro/middleware'
-import { locales, defaultLocale } from './i18n'
-
-export const onRequest = defineMiddleware(
-  middleware({
-    locales,
-    defaultLocale,
-    strategy: 'redirect',
-    detectLanguage: true,
-    excludePaths: ['/api', '/_image']
-  })
-)
-```
-
-**Step 4: Use in components**
-
-```astro
----
-// src/pages/[locale]/index.astro
-
-import { i18n } from '../../i18n'
-
-const { locale } = Astro.params as { locale: string }
-
-const messages = i18n.getMessages(locale)
-const t = i18n.getTranslations(locale)
----
-
-<html lang={locale}>
-  <body>
-    <h1>{messages.common.title}</h1>
-    <p>{t('common.description')}</p>
-  </body>
-</html>
-```
-
-## Comparison
-
-| Feature | Option 1 (Astro i18n) | Option 2 (Standalone) |
-|---------|----------------------|----------------------|
-| Astro version | 4.0+ required | 3.0+ supported |
-| Bundle size | Smaller (no middleware) | Slightly larger |
-| Configuration | Split (astro.config.mjs + i18n.ts) | Single file |
-| Flexibility | Standard Astro patterns | Customizable middleware |
-| Language detection | Via Astro | Via middleware |
-| Maintenance | By Astro team | By @i18n-tiny |
+That's it! **Types are automatically inferred** - no manual type annotations needed.
 
 ## API Reference
 
-### `define(config)`
+### `@i18n-tiny/astro`
+
+#### `define(config)`
 
 Defines an i18n instance with automatic type inference.
 
 **Parameters:**
 
-- `config.locales` (optional) - Array of supported locales. Inferred from messages if not provided.
-- `config.defaultLocale` (optional) - Default locale. Uses first locale if not provided.
-- `config.messages` - Messages object keyed by locale
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `locales` | `readonly string[]` | Array of supported locales (optional, inferred from messages) |
+| `defaultLocale` | `string` | Default locale (optional, uses first locale) |
+| `messages` | `Record<Locale, Messages>` | Messages object keyed by locale |
 
 **Returns:**
 
 ```typescript
 {
-  locales,            // Array of supported locales
-  defaultLocale,      // Default locale
-  getMessages,        // Get messages object for a locale
-  getTranslations,    // Get translation function for a locale
-  getLocalizedPath    // Get localized path with locale prefix
+  locales: readonly string[]
+  defaultLocale: string
+  getMessages: (locale: string | undefined) => Messages
+  getTranslations: (locale: string | undefined, namespace?: string) => TranslationFunction
 }
 ```
 
-### `getMessages(locale)`
+#### `DefineConfig` (type)
 
-Get the full messages object for a locale.
+Type for the configuration object passed to `define()`.
 
-```typescript
-const messages = i18n.getMessages(Astro.currentLocale)
-console.log(messages.common.title) // "My Site"
-```
+### `@i18n-tiny/astro/middleware`
 
-### `getTranslations(locale, namespace?)`
+#### `create(config)`
 
-Get a translation function for a locale. Optionally scoped to a namespace.
+Creates an Astro middleware handler for i18n routing.
 
-```typescript
-const t = i18n.getTranslations(Astro.currentLocale)
-console.log(t('common.title')) // "My Site"
+**Parameters:**
 
-// With namespace
-const tCommon = i18n.getTranslations(Astro.currentLocale, 'common')
-console.log(tCommon('title')) // "My Site"
-```
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `locales` | `readonly string[]` | - | Array of supported locales |
+| `defaultLocale` | `string` | - | Default locale for redirects |
+| `fallbackLocale` | `string` | `defaultLocale` | Fallback when detection fails |
+| `excludePaths` | `string[]` | `[]` | Paths to exclude from i18n handling |
+| `prefixDefault` | `boolean` | `false` | Whether to prefix default locale in URLs |
+| `detectLanguage` | `boolean` | `true` | Whether to detect from Accept-Language |
+| `routing` | `'rewrite'` | - | SSR rewrite mode (mutually exclusive with prefixDefault/detectLanguage) |
 
-### `getLocalizedPath(path, locale)`
+**Routing Behavior Matrix:**
 
-Get a localized path with the appropriate locale prefix.
+| prefixDefault | detectLanguage | `/` behavior |
+|---------------|----------------|--------------|
+| `false` | `false` | Serves fallbackLocale, no detection |
+| `false` | `true` | Detects, redirects non-default, rewrites default |
+| `true` | `false` | Redirects to `/[defaultLocale]` |
+| `true` | `true` | Detects and redirects to detected locale |
 
-```typescript
-// With default locale (en)
-i18n.getLocalizedPath('/about', 'en') // "/about"
-
-// With non-default locale
-i18n.getLocalizedPath('/about', 'ja') // "/ja/about"
-```
-
-## Middleware (Option 2 only)
-
-### `middleware(config)`
-
-Creates an Astro middleware for automatic locale detection and routing.
+**Examples:**
 
 ```typescript
-import { defineMiddleware } from 'astro/middleware'
-import { middleware } from '@i18n-tiny/astro/middleware'
-
+// Default: detect language, redirect non-default, rewrite default
 export const onRequest = defineMiddleware(
-  middleware({
+  create({
+    locales: ['en', 'ja'],
+    defaultLocale: 'en'
+  })
+)
+
+// Always prefix all locales (including default)
+export const onRequest = defineMiddleware(
+  create({
     locales: ['en', 'ja'],
     defaultLocale: 'en',
-    strategy: 'redirect',
-    detectLanguage: true,
-    excludePaths: ['/api']
+    prefixDefault: true
+  })
+)
+
+// No detection, always use fallback
+export const onRequest = defineMiddleware(
+  create({
+    locales: ['en', 'ja'],
+    defaultLocale: 'en',
+    detectLanguage: false
+  })
+)
+
+// SSR rewrite mode (locale in Astro.locals)
+export const onRequest = defineMiddleware(
+  create({
+    locales: ['en', 'ja'],
+    defaultLocale: 'en',
+    routing: 'rewrite'
   })
 )
 ```
 
-**Options:**
+**SSR Rewrite Mode:**
 
-- `locales` - Array of supported locales
-- `defaultLocale` - Default locale
-- `strategy` - `'redirect'` (302 redirect) or `'rewrite'` (URL stays the same). Default: `'redirect'`
-- `detectLanguage` - Whether to detect language from Accept-Language header. Default: `true`
-- `excludePaths` - Paths to exclude from i18n handling. Default: `[]`
+When using `routing: 'rewrite'`, the locale is stored in `Astro.locals.locale`:
 
-### `removeLocalePrefix(pathname, locales)` (from `@i18n-tiny/core`)
+```astro
+---
+// src/pages/index.astro (no [locale] folder needed)
+import { getMessages } from '../i18n'
 
-Remove locale prefix from pathname. Useful for language switchers.
+const locale = Astro.locals.locale  // 'en' or 'ja'
+const messages = getMessages(locale)
+---
+
+<html lang={locale}>
+  <body>
+    <h1>{messages.common.title}</h1>
+  </body>
+</html>
+```
+
+#### `MiddlewareConfig` (type)
+
+Type for the configuration object passed to `create()`.
+
+### `@i18n-tiny/astro/router`
+
+#### `Link` Component
+
+Localized Link component that auto-detects locale from current URL.
+
+```astro
+---
+import Link from '@i18n-tiny/astro/router/Link.astro'
+---
+
+<!-- Auto-localized (maintains current URL pattern) -->
+<Link href="/about">About</Link>
+
+<!-- Explicit locale override -->
+<Link href="/" locale="ja">日本語</Link>
+
+<!-- Raw path (no localization) -->
+<Link href="/" locale="">English</Link>
+```
+
+### `@i18n-tiny/core`
+
+#### `detectLocale(acceptLanguage, supportedLocales)`
+
+Detects the best matching locale from the Accept-Language header.
 
 ```typescript
-import { removeLocalePrefix } from '@i18n-tiny/astro'
+import { detectLocale } from '@i18n-tiny/core/middleware'
 
-// Remove locale prefix from path
-removeLocalePrefix('/ja/about', ['en', 'ja']) // '/about'
-removeLocalePrefix('/ja', ['en', 'ja'])       // '/'
-removeLocalePrefix('/about', ['en', 'ja'])    // '/about' (unchanged)
+const acceptLanguage = request.headers.get('accept-language')
+const locale = detectLocale(acceptLanguage, ['en', 'ja'])
+// Returns: 'en' | 'ja' | null
+```
+
+### `@i18n-tiny/core/router`
+
+#### `getLocalizedPath(path, locale, defaultLocale, prefixDefault?)`
+
+Generate a localized path with locale prefix.
+
+```typescript
+import { getLocalizedPath } from '@i18n-tiny/core/router'
+
+getLocalizedPath('/about', 'ja', 'en')        // '/ja/about'
+getLocalizedPath('/about', 'en', 'en')        // '/about'
+getLocalizedPath('/about', 'en', 'en', true)  // '/en/about'
+```
+
+#### `removeLocalePrefix(pathname, locales)`
+
+Remove locale prefix from pathname.
+
+```typescript
+import { removeLocalePrefix } from '@i18n-tiny/core/router'
+
+removeLocalePrefix('/ja/about', ['en', 'ja'])  // '/about'
+removeLocalePrefix('/ja', ['en', 'ja'])        // '/'
+removeLocalePrefix('/about', ['en', 'ja'])     // '/about'
 ```
 
 ## Advanced Usage
 
-### Language Switcher
+### Static Site Generation (SSG)
 
-Create a component to switch between languages while preserving the current path.
+For static sites, use `getStaticPaths`:
+
+```astro
+---
+// src/pages/[locale]/index.astro
+import { locales, getMessages } from '../../i18n'
+
+export function getStaticPaths() {
+  return locales.map((locale) => ({
+    params: { locale }
+  }))
+}
+
+const { locale } = Astro.params
+const messages = getMessages(locale)
+---
+
+<html lang={locale}>
+  <body>
+    <h1>{messages.common.title}</h1>
+  </body>
+</html>
+```
+
+### Language Switcher
 
 ```astro
 ---
 // src/components/LanguageSwitcher.astro
-import { i18n, removeLocalePrefix } from '../i18n'
+import Link from '@i18n-tiny/astro/router/Link.astro'
+import { locales } from '../i18n'
 
-const locale = Astro.currentLocale ?? i18n.defaultLocale
-const pathname = Astro.url.pathname
-
-// Get base path without locale
-const basePath = removeLocalePrefix(pathname, i18n.locales)
+const locale = Astro.params.locale ?? Astro.locals.locale
 
 const localeNames: Record<string, string> = {
   en: 'English',
@@ -343,39 +375,45 @@ const localeNames: Record<string, string> = {
 ---
 
 <nav>
-  {i18n.locales.map((loc) => (
-    <a
-      href={i18n.getLocalizedPath(basePath, loc)}
-      class:list={[{ active: loc === locale }]}
+  {locales.map((loc) => (
+    <Link
+      href="/"
+      locale={loc}
+      style={loc === locale ? 'font-weight: bold;' : ''}
     >
       {localeNames[loc]}
-    </a>
+    </Link>
   ))}
 </nav>
-
-<style>
-  nav { display: flex; gap: 1rem; }
-  .active { font-weight: bold; }
-</style>
 ```
 
-### Static Site Generation (SSG)
+### With Astro's Built-in i18n
 
-For static sites, create pages for each locale using Astro's `getStaticPaths`:
+You can also use Astro's built-in i18n routing with @i18n-tiny/astro for translations only:
+
+```javascript
+// astro.config.mjs
+import { defineConfig } from 'astro/config'
+
+export default defineConfig({
+  i18n: {
+    defaultLocale: 'en',
+    locales: ['en', 'ja'],
+    routing: {
+      prefixDefaultLocale: false
+    }
+  }
+})
+```
 
 ```astro
 ---
 // src/pages/[locale]/index.astro
-import { i18n } from '../../i18n'
+import { getMessages } from '../../i18n'
 
-export function getStaticPaths() {
-  return i18n.locales.map((locale) => ({
-    params: { locale }
-  }))
-}
-
-const { locale } = Astro.params
-const messages = i18n.getMessages(locale)
+// Astro.currentLocale is available in Astro 4.0+
+const locale = Astro.currentLocale
+const messages = getMessages(locale)
 ---
 
 <html lang={locale}>
@@ -384,37 +422,6 @@ const messages = i18n.getMessages(locale)
   </body>
 </html>
 ```
-
-### React Islands
-
-For React components in Astro (islands), use `@i18n-tiny/react` (coming soon) or pass translations as props:
-
-```astro
----
-// src/pages/[locale]/index.astro
-import { i18n } from '../../i18n'
-import MyReactComponent from '../../components/MyReactComponent'
-
-const locale = Astro.currentLocale
-const messages = i18n.getMessages(locale)
----
-
-<MyReactComponent
-  client:load
-  messages={messages}
-  locale={locale}
-/>
-```
-
-## Technical Notes
-
-### Message Serialization
-
-This library uses `JSON.parse(JSON.stringify())` to convert ES module namespace objects to plain objects, ensuring compatibility across different module systems.
-
-### Astro.currentLocale
-
-This library works best with Astro 4.0+ which provides `Astro.currentLocale` natively. For older versions, you'll need to extract the locale from the URL path manually or use the standalone middleware option.
 
 ## License
 

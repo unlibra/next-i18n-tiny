@@ -7,20 +7,13 @@ import {
   useTranslations as baseUseTranslations,
   useLocale as baseUseLocale
 } from './components'
-import type { NestedKeys } from '@i18n-tiny/core'
+import type { NestedKeys } from '@i18n-tiny/core/internal'
 
 // Re-export types for Provider
 export type { ProviderProps } from './components'
 
-export interface I18nConfig<
-  L extends readonly string[],
-  M extends Record<string, any>, // eslint-disable-line @typescript-eslint/no-explicit-any
-  Msgs extends Record<L[number], M> = Record<L[number], M>
-> {
-  locales: L
-  defaultLocale: L[number]
-  messages: Msgs
-}
+// Re-export DefineConfig for users who want to type their config
+export type { DefineConfig } from '@i18n-tiny/core'
 
 /**
  * Define i18n instance with automatic type inference
@@ -30,19 +23,20 @@ export interface I18nConfig<
  * import jaMessages from './messages/ja'
  * import enMessages from './messages/en'
  *
+ * const messages = { ja: jaMessages, en: enMessages }
+ *
  * export const i18n = define({
  *   locales: ['ja', 'en'] as const,
  *   defaultLocale: 'ja',
- *   messages: { ja: jaMessages, en: enMessages }
+ *   messages
  * })
  *
  * // App.tsx
  * function App() {
  *   const [locale, setLocale] = useState('ja')
- *   const messages = i18n.messages[locale]
  *
  *   return (
- *     <i18n.Provider locale={locale} messages={messages}>
+ *     <i18n.Provider locale={locale} messages={messages[locale]}>
  *       <YourApp />
  *     </i18n.Provider>
  *   )
@@ -62,7 +56,7 @@ export function define<
   M extends Record<string, any>, // eslint-disable-line @typescript-eslint/no-explicit-any
   Msgs extends Record<L[number], M>
 > (config: { locales: L; defaultLocale: L[number]; messages: Msgs }) {
-  const { locales, defaultLocale, messages } = config
+  const { locales, defaultLocale } = config
 
   // Type aliases for automatic inference
   type MessageType = Msgs[L[0]]
@@ -105,7 +99,6 @@ export function define<
     useTranslations,
     useLocale,
     locales,
-    defaultLocale,
-    messages
+    defaultLocale
   }
 }

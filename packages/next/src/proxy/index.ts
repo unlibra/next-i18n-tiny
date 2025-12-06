@@ -14,7 +14,7 @@
 
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { detectLocale } from '@i18n-tiny/core'
+import { detectLocale } from '@i18n-tiny/core/middleware'
 
 /**
  * Base configuration for proxy
@@ -201,5 +201,3 @@ export function create(config: ProxyConfig) {
   }
 }
 
-// Re-export for convenience
-export { detectLocale } from '@i18n-tiny/core'

@@ -28,6 +28,16 @@
       "types": "./dist/router/index.d.ts",
       "import": "./dist/router/index.js",
       "require": "./dist/router/index.cjs"
+    },
+    "./middleware": {
+      "types": "./dist/middleware/index.d.ts",
+      "import": "./dist/middleware/index.js",
+      "require": "./dist/middleware/index.cjs"
+    },
+    "./internal": {
+      "types": "./dist/internal/index.d.ts",
+      "import": "./dist/internal/index.js",
+      "require": "./dist/internal/index.cjs"
     }
   },
   "files": [

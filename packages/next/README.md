@@ -93,17 +93,18 @@ Place this file anywhere in your project (`i18n.ts`, `lib/i18n.ts`, etc.)
 ```typescript
 // i18n.ts
 import { define } from '@i18n-tiny/next'
+import { Link } from '@i18n-tiny/next/router'
 import enMessages from '@/messages/en'
 import jaMessages from '@/messages/ja'
 
-export type Locale = 'ja' | 'en'
-const locales: Locale[] = ['ja', 'en']
-const defaultLocale: Locale = 'ja'
+export const locales = ['en', 'ja'] as const
+export type Locale = (typeof locales)[number]
+export const defaultLocale: Locale = 'en'
 
-const { client, server, Link, Provider } = define({
+const { client, server, Provider } = define({
   locales,
   defaultLocale,
-  messages: { ja: jaMessages, en: enMessages }
+  messages: { en: enMessages, ja: jaMessages }
 })
 
 export { Link, Provider }
@@ -111,68 +112,22 @@ export const { useMessages, useTranslations, useLocale } = client
 export const { getMessages, getTranslations } = server
 ```
 
-**3. Setup Proxy** (Next.js 16+)
+**3. Setup Proxy**
 
 ```typescript
-// proxy.ts
-import type { NextRequest } from 'next/server'
-import { NextResponse } from 'next/server'
+// proxy.ts (Next.js 16+) or middleware.ts (Next.js 15)
+import { create } from '@i18n-tiny/next/proxy'
+import { locales, defaultLocale } from '@/i18n'
 
-import { defaultLocale, locales } from '@/i18n'
-
-export function proxy (request: NextRequest) {
-  const { pathname } = request.nextUrl
-
-  // Check if the pathname already has a locale
-  const hasLocale = locales.some(
-    (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
-  )
-
-  // If locale is present, continue
-  if (hasLocale) return NextResponse.next()
-
-  // Redirect to default locale (rewrite strategy)
-  request.nextUrl.pathname = `/${defaultLocale}${pathname}`
-  return NextResponse.rewrite(request.nextUrl)
-}
+export const proxy = create({
+  locales,
+  defaultLocale
+})
 
 export const config = {
-  matcher: ['/((?!api|_next|.*\\..*).*)']
+  matcher: ['/((?!api|_next|.*\\..*).*)*']
 }
 ```
-
-<details>
-<summary>Next.js 15 or earlier (middleware.ts)</summary>
-
-```typescript
-// middleware.ts
-import type { NextRequest } from 'next/server'
-import { NextResponse } from 'next/server'
-
-import { defaultLocale, locales } from '@/i18n'
-
-export function middleware (request: NextRequest) {
-  const { pathname } = request.nextUrl
-
-  // Check if the pathname already has a locale
-  const hasLocale = locales.some(
-    (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
-  )
-
-  // If locale is present, continue
-  if (hasLocale) return NextResponse.next()
-
-  // Redirect to default locale (rewrite strategy)
-  request.nextUrl.pathname = `/${defaultLocale}${pathname}`
-  return NextResponse.rewrite(request.nextUrl)
-}
-
-export const config = {
-  matcher: ['/((?!api|_next|.*\\..*).*)']
-}
-```
-
-</details>
 
 **4. Use in Layout**
 
@@ -248,70 +203,168 @@ Both are fully typed with autocomplete. Use whichever you prefer!
 
 ## API Reference
 
-### `define(config)`
+### `@i18n-tiny/next`
+
+#### `define(config)`
 
 Defines an i18n instance with automatic type inference.
 
 **Parameters:**
 
-- `config.locales` - Array of supported locales
-- `config.defaultLocale` - Default locale
-- `config.messages` - Messages object keyed by locale
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `locales` | `readonly string[]` | Array of supported locales (e.g., `['en', 'ja'] as const`) |
+| `defaultLocale` | `string` | Default locale |
+| `messages` | `Record<Locale, Messages>` | Messages object keyed by locale |
 
 **Returns:**
 
 ```typescript
 {
-  Provider,        // Context provider component
-  Link,            // Next.js Link with locale handling
+  Provider: React.FC<{ locale: string; messages: Messages; children: ReactNode }>
+  locales: readonly string[]
+  defaultLocale: string
   server: {
-    getMessages,   // Get messages object
-    getTranslations // Get translation function
-  },
+    getMessages: (locale: string) => Promise<Messages>
+    getTranslations: (locale: string, namespace?: string) => Promise<TranslationFunction>
+  }
   client: {
-    useMessages,   // Get messages object (hook)
-    useTranslations, // Get translation function (hook)
-    useLocale      // Get current locale (hook)
+    useMessages: () => Messages
+    useTranslations: (namespace?: string) => TranslationFunction
+    useLocale: () => string
   }
 }
 ```
 
-### `detectLocale(acceptLanguage, supportedLocales)` (from `@i18n-tiny/core`)
+#### `DefineConfig` (type)
 
-Detects the best matching locale from the Accept-Language header.
+Type for the configuration object passed to `define()`.
+
+### `@i18n-tiny/next/proxy`
+
+#### `create(config)`
+
+Creates a Next.js proxy (middleware) handler for i18n routing.
 
 **Parameters:**
 
-- `acceptLanguage` - The Accept-Language header value from the request (e.g., `"ja,en-US;q=0.9,en;q=0.8"`)
-- `supportedLocales` - Array of locale codes supported by your application
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `locales` | `readonly string[]` | - | Array of supported locales |
+| `defaultLocale` | `string` | - | Default locale for redirects |
+| `fallbackLocale` | `string` | `defaultLocale` | Fallback when detection fails |
+| `prefixDefault` | `boolean` | `false` | Whether to prefix default locale in URLs |
+| `detectLanguage` | `boolean` | `true` | Whether to detect from Accept-Language |
+| `routing` | `'rewrite'` | - | SSR rewrite mode (mutually exclusive with prefixDefault/detectLanguage) |
 
-**Returns:**
+**Routing Behavior Matrix:**
 
-- The best matching locale string, or `null` if no match is found
+| prefixDefault | detectLanguage | `/` behavior |
+|---------------|----------------|--------------|
+| `false` | `false` | Serves fallbackLocale, no detection |
+| `false` | `true` | Detects, redirects non-default, rewrites default |
+| `true` | `false` | Redirects to `/[defaultLocale]` |
+| `true` | `true` | Detects and redirects to detected locale |
 
-**Example:**
+**Examples:**
 
 ```typescript
-import { detectLocale } from '@i18n-tiny/core'
+// Default: detect language, redirect non-default, rewrite default
+export const proxy = create({
+  locales: ['en', 'ja'],
+  defaultLocale: 'en'
+})
 
-const acceptLanguage = request.headers.get('accept-language')
-const locale = detectLocale(acceptLanguage, ['ja', 'en']) // Returns: 'ja' or 'en' or null
+// Always prefix all locales (including default)
+export const proxy = create({
+  locales: ['en', 'ja'],
+  defaultLocale: 'en',
+  prefixDefault: true
+})
+
+// No detection, always use fallback
+export const proxy = create({
+  locales: ['en', 'ja'],
+  defaultLocale: 'en',
+  detectLanguage: false
+})
+
+// SSR rewrite mode (locale in x-locale header)
+export const proxy = create({
+  locales: ['en', 'ja'],
+  defaultLocale: 'en',
+  routing: 'rewrite'
+})
 ```
 
-**How it works:**
+#### `ProxyConfig` (type)
 
-- Parses the Accept-Language header and sorts languages by quality value
-- Returns the highest priority locale that matches your supported locales
-- Normalizes language codes (e.g., `en-US` → `en`, `ja-JP` → `ja`)
-- Returns `null` if no supported locale matches
+Type for the configuration object passed to `create()`.
+
+### `@i18n-tiny/next/router`
+
+#### `Link`
+
+Localized Link component that auto-detects locale from current URL.
+
+```typescript
+import { Link } from '@i18n-tiny/next/router'
+
+// Auto-localized (maintains current URL pattern)
+<Link href="/about">About</Link>
+
+// Explicit locale override
+<Link href="/" locale="ja">日本語</Link>
+
+// Raw path (no localization)
+<Link href="/" locale="">English</Link>
+```
+
+### `@i18n-tiny/core`
+
+#### `detectLocale(acceptLanguage, supportedLocales)`
+
+Detects the best matching locale from the Accept-Language header.
+
+```typescript
+import { detectLocale } from '@i18n-tiny/core/middleware'
+
+const acceptLanguage = request.headers.get('accept-language')
+const locale = detectLocale(acceptLanguage, ['en', 'ja'])
+// Returns: 'en' | 'ja' | null
+```
+
+### `@i18n-tiny/core/router`
+
+#### `getLocalizedPath(path, locale, defaultLocale, prefixDefault?)`
+
+Generate a localized path with locale prefix.
+
+```typescript
+import { getLocalizedPath } from '@i18n-tiny/core/router'
+
+getLocalizedPath('/about', 'ja', 'en')        // '/ja/about'
+getLocalizedPath('/about', 'en', 'en')        // '/about'
+getLocalizedPath('/about', 'en', 'en', true)  // '/en/about'
+```
+
+#### `removeLocalePrefix(pathname, locales)`
+
+Remove locale prefix from pathname.
+
+```typescript
+import { removeLocalePrefix } from '@i18n-tiny/core/router'
+
+removeLocalePrefix('/ja/about', ['en', 'ja'])  // '/about'
+removeLocalePrefix('/ja', ['en', 'ja'])        // '/'
+removeLocalePrefix('/about', ['en', 'ja'])     // '/about'
+```
 
 ## Advanced Usage
 
 ### Static Site Generation (SSG)
 
-To generate static pages for all locales at build time, simply add `generateStaticParams` to your **root layout** (`app/[locale]/layout.tsx`).
-
-Unlike some other libraries, **you do not need to add this to every page**. Defining it once in the layout automatically enables static generation for all child routes.
+To generate static pages for all locales at build time, add `generateStaticParams` to your **root layout**.
 
 ```typescript
 // app/[locale]/layout.tsx
@@ -326,118 +379,29 @@ export default function Layout({ children, params }) {
 }
 ```
 
-### Automatic Language Detection
-
-Detect user's preferred language from the `Accept-Language` header and redirect to the appropriate locale.
-
-```typescript
-// proxy.ts (Next.js 16+) or middleware.ts
-import type { NextRequest } from 'next/server'
-import { NextResponse } from 'next/server'
-import { detectLocale } from '@i18n-tiny/core'
-import { locales } from '@/i18n'
-
-export function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl
-
-  // Check if the pathname already has a locale
-  const hasLocale = locales.some(
-    (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
-  )
-
-  if (hasLocale) return NextResponse.next()
-
-  // Detect user's preferred language
-  const acceptLanguage = request.headers.get('accept-language')
-  const detectedLocale = detectLocale(acceptLanguage, locales) ?? 'en'
-
-  // Redirect to the detected locale
-  return NextResponse.redirect(new URL(`/${detectedLocale}${pathname}`, request.url))
-}
-
-export const config = {
-  matcher: ['/((?!api|_next|.*\\..*).*)']
-}
-```
-
-**How it works:**
-
-- Parses `Accept-Language` header (e.g., `"ja,en-US;q=0.9,en;q=0.8"`)
-- Returns the highest priority locale that matches your supported locales
-- Falls back to your specified default if no match is found
-- **Maintains SSG** - only root path (`/`) is redirected, all locale pages remain static
-
 ### Language Switcher
 
-Create a component to switch between languages while preserving the current path.
-
 ```typescript
-// components/LanguageSwitcher.tsx
 'use client'
+import { Link, useLocale } from '@/i18n'
 
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { removeLocalePrefix } from '@i18n-tiny/core'
-
-// Import i18n settings and hooks
-import { defaultLocale, locales, useLocale } from '@/i18n'
-
-// Define display names for locales
-const localeNames: Record<string, string> = {
-  ja: '日本語',
-  en: 'English'
-}
-
-export function LanguageSwitcher () {
-  const locale = useLocale() // Get the current active locale
-  const pathname = usePathname() // Get the current path without locale prefix (e.g., /about)
-
-  // Remove locale prefix from current path
-  const basePath = removeLocalePrefix(pathname, locales)
-
-  // Generate the path for a new locale
-  const getLocalizedPath = (newLocale: string) => {
-    // If the new locale is the default, remove the locale prefix from the path
-    if (newLocale === defaultLocale) {
-      return basePath
-    }
-    // Otherwise, prepend the new locale to the base path
-    return `/${newLocale}${basePath}`
-  }
+export function LanguageSwitcher() {
+  const locale = useLocale()
 
   return (
-    <div style={{ display: 'flex', gap: '10px' }}>
-      {locales.map((locale) => (
-        // Create a link for each locale
-        <Link key={locale} href={getLocalizedPath(locale)}>
-          {localeNames[locale]} {/* Display locale name */}
-        </Link>
-      ))}
+    <div>
+      <Link href="/" locale="en" style={{ fontWeight: locale === 'en' ? 'bold' : 'normal' }}>
+        English
+      </Link>
+      <Link href="/" locale="ja" style={{ fontWeight: locale === 'ja' ? 'bold' : 'normal' }}>
+        日本語
+      </Link>
     </div>
   )
 }
 ```
 
-## Technical Notes
-
-### Message Serialization
-
-This library uses `JSON.parse(JSON.stringify())` to convert ES module namespace objects to plain objects, ensuring React Server Components compatibility.
-
-### Link Component
-
-The `Link` component automatically handles both string paths and Next.js `UrlObject`:
-
-```typescript
-<Link href="/about">About</Link>
-<Link href={{ pathname: '/search', query: { q: 'test' } }}>Search</Link>
-```
-
-Both will have the locale prefix automatically added based on the current locale.
-
 ## Migration from next-i18n-tiny
-
-If you're using the old `next-i18n-tiny` package:
 
 ```diff
 - import { define } from 'next-i18n-tiny'

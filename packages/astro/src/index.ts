@@ -5,8 +5,8 @@
  * Type-safe, zero-dependency, minimal setup.
  */
 
-import type { NestedKeys } from '@i18n-tiny/core'
-import { resolveMessage } from '@i18n-tiny/core'
+import type { NestedKeys } from '@i18n-tiny/core/internal'
+import { resolveMessage } from '@i18n-tiny/core/internal'
 
 export interface I18nConfig<
   L extends readonly string[],
@@ -90,6 +90,5 @@ export function define<
   }
 }
 
-// Re-export core utilities
-export { detectLocale } from '@i18n-tiny/core'
-export type { NestedKeys } from '@i18n-tiny/core'
+// Re-export DefineConfig for users who want to type their config
+export type { DefineConfig } from '@i18n-tiny/core'

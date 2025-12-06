@@ -4,7 +4,7 @@ import { create } from '../middleware'
 // Track method calls
 let redirectCalls: Array<{ pathname: string; status: number }> = []
 let rewriteCalls: Array<string> = []
-let nextCalls = 0
+const _nextCalls = 0 // eslint-disable-line @typescript-eslint/no-unused-vars
 
 const createMockContext = (
   pathname: string,

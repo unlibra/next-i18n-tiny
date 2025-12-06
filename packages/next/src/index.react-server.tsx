@@ -5,18 +5,11 @@
 
 import type { ReactNode } from 'react'
 import { I18nProvider as BaseProvider } from '@i18n-tiny/react/internal'
-import type { NestedKeys } from '@i18n-tiny/core'
-import { resolveMessage } from '@i18n-tiny/core'
+import type { NestedKeys } from '@i18n-tiny/core/internal'
+import { resolveMessage } from '@i18n-tiny/core/internal'
 
-export interface I18nConfig<
-  L extends readonly string[],
-  M extends Record<string, any>, // eslint-disable-line @typescript-eslint/no-explicit-any
-  Msgs extends Record<L[number], M> = Record<L[number], M>
-> {
-  locales: L
-  defaultLocale: L[number]
-  messages: Msgs
-}
+// Re-export DefineConfig for users who want to type their config
+export type { DefineConfig } from '@i18n-tiny/core'
 
 function clientOnlyError (name: string): never {
   throw new Error(
@@ -74,23 +67,6 @@ export function define<
       return (key: MessageKeys, vars?: Record<string, string | number>): string => {
         return resolveMessage(msgs, key, namespace, locale, vars)
       }
-    },
-
-    getLocalizedPath: (path: string, locale: string): string => {
-      const cleanPath = path.startsWith('/') ? path : `/${path}`
-
-      // Avoid double prefixing
-      if (cleanPath.startsWith(`/${locale}/`) || cleanPath === `/${locale}`) {
-        return cleanPath
-      }
-
-      // For default locale, no prefix needed
-      if (locale === defaultLocale) {
-        return cleanPath
-      }
-
-      // Add locale prefix for non-default locales
-      return cleanPath === '/' ? `/${locale}` : `/${locale}${cleanPath}`
     }
   }
 

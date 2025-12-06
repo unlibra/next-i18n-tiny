@@ -1,2 +1,2 @@
-// Re-export core types for convenience
-export type { NestedKeys, I18nConfig } from '@i18n-tiny/core'
+// Re-export DefineConfig for convenience (NestedKeys is internal only)
+export type { DefineConfig } from '@i18n-tiny/core'

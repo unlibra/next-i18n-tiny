@@ -43,7 +43,8 @@ describe('define', () => {
     expect(i18n).toHaveProperty('useLocale')
     expect(i18n).toHaveProperty('locales')
     expect(i18n).toHaveProperty('defaultLocale')
-    expect(i18n).toHaveProperty('messages')
+    // Note: messages is NOT included in return value - accessed via hooks only
+    expect(i18n).not.toHaveProperty('messages')
   })
 
   it('should expose locales and defaultLocale', () => {
@@ -55,16 +56,6 @@ describe('define', () => {
 
     expect(i18n.locales).toEqual(['en', 'ja'])
     expect(i18n.defaultLocale).toBe('en')
-  })
-
-  it('should expose messages', () => {
-    const i18n = define({
-      locales,
-      defaultLocale: 'en',
-      messages
-    })
-
-    expect(i18n.messages).toBe(messages)
   })
 
   it('should render with Provider and useMessages', () => {

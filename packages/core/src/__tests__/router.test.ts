@@ -374,7 +374,7 @@ describe('Router Matrix Tests', () => {
       ['en-AU,en;q=0.9', 'en', 'Australian English matches en'],
     ] as const)(
       'detectLocale("%s") → %s (%s)',
-      (acceptLanguage, expectedLocale, _description) => {
+      (acceptLanguage, expectedLocale) => {
         const result = detectLocale(acceptLanguage, LOCALES)
         expect(result).toBe(expectedLocale)
       }
@@ -483,7 +483,7 @@ describe('Router Matrix Tests', () => {
         ['/about', '/', undefined, '/about', 'no locale at root'],
       ] as const)(
         'getLinkHref("%s", "%s", %s) → "%s" (%s)',
-        (href, currentPathname, currentLocale, expected, _description) => {
+        (href, currentPathname, currentLocale, expected) => {
           expect(getLinkHref(href, currentPathname, currentLocale)).toBe(expected)
         }
       )

@@ -15,20 +15,40 @@ Currently supports: **Next.js** | **Astro**
 [![npm version](https://img.shields.io/npm/v/@i18n-tiny/next.svg)](https://www.npmjs.com/package/@i18n-tiny/next)
 [![npm downloads](https://img.shields.io/npm/dm/@i18n-tiny/next.svg)](https://www.npmjs.com/package/@i18n-tiny/next)
 
+```bash
+npm install @i18n-tiny/next
+```
+
 ```typescript
+// i18n.ts
 import { define } from '@i18n-tiny/next'
+import { Link } from '@i18n-tiny/next/router'
 import enMessages from './messages/en'
 import jaMessages from './messages/ja'
 
-export const i18n = define({
+const { client, server, Provider } = define({
   locales: ['en', 'ja'] as const,
   defaultLocale: 'en',
   messages: { en: enMessages, ja: jaMessages }
 })
 
-// Automatic type inference - no manual annotations needed!
-// messages.common.title - autocomplete ✓
-// t('common.title') - autocomplete ✓
+export { Link, Provider }
+export const { useMessages, useTranslations, useLocale } = client
+export const { getMessages, getTranslations } = server
+```
+
+```typescript
+// proxy.ts
+import { create } from '@i18n-tiny/next/proxy'
+
+export const proxy = create({
+  locales: ['en', 'ja'],
+  defaultLocale: 'en'
+})
+
+export const config = {
+  matcher: ['/((?!api|_next|.*\\..*).*)*']
+}
 ```
 
 [Full documentation →](./packages/next/README.md)
@@ -38,49 +58,37 @@ export const i18n = define({
 [![npm version](https://img.shields.io/npm/v/@i18n-tiny/astro.svg)](https://www.npmjs.com/package/@i18n-tiny/astro)
 [![npm downloads](https://img.shields.io/npm/dm/@i18n-tiny/astro.svg)](https://www.npmjs.com/package/@i18n-tiny/astro)
 
+```bash
+npm install @i18n-tiny/astro
+```
+
 ```typescript
+// src/i18n.ts
 import { define } from '@i18n-tiny/astro'
 import enMessages from './messages/en'
 import jaMessages from './messages/ja'
 
-export const i18n = define({
+export const { locales, defaultLocale, getMessages, getTranslations } = define({
   locales: ['en', 'ja'] as const,
   defaultLocale: 'en',
   messages: { en: enMessages, ja: jaMessages }
 })
+```
 
-// In .astro files
-const messages = i18n.getMessages(Astro.currentLocale)
-const t = i18n.getTranslations(Astro.currentLocale)
+```typescript
+// src/middleware.ts
+import { defineMiddleware } from 'astro/middleware'
+import { create } from '@i18n-tiny/astro/middleware'
+
+export const onRequest = defineMiddleware(
+  create({
+    locales: ['en', 'ja'],
+    defaultLocale: 'en'
+  })
+)
 ```
 
 [Full documentation →](./packages/astro/README.md)
-
-## Packages
-
-### [@i18n-tiny/next](./packages/next)
-
-[![npm version](https://img.shields.io/npm/v/@i18n-tiny/next.svg)](https://www.npmjs.com/package/@i18n-tiny/next)
-
-Type-safe i18n library for Next.js App Router with React Server Components support.
-
-[Documentation →](./packages/next/README.md)
-
-```bash
-npm install @i18n-tiny/next
-```
-
-### [@i18n-tiny/astro](./packages/astro)
-
-[![npm version](https://img.shields.io/npm/v/@i18n-tiny/astro.svg)](https://www.npmjs.com/package/@i18n-tiny/astro)
-
-Type-safe i18n library for Astro with middleware support.
-
-[Documentation →](./packages/astro/README.md)
-
-```bash
-npm install @i18n-tiny/astro
-```
 
 ## Features
 
