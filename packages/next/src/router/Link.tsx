@@ -4,7 +4,7 @@ import NextLink from 'next/link'
 import { usePathname } from 'next/navigation'
 import type { ComponentProps } from 'react'
 
-import { useLocale } from '@i18n-tiny/react/internal'
+import { useLocale, useLocales } from '@i18n-tiny/react/internal'
 import { getLinkHref } from '@i18n-tiny/core/router'
 
 export interface LinkProps extends Omit<ComponentProps<typeof NextLink>, 'locale'> {
@@ -15,6 +15,13 @@ export interface LinkProps extends Omit<ComponentProps<typeof NextLink>, 'locale
    * - '' (empty string) or false: use href as-is without any localization (raw path)
    */
   locale?: string | false
+  /**
+   * Normalize href by removing any existing locale prefix before processing.
+   * When true, locales are read from I18nProvider context.
+   * Useful when href comes from usePathname() or similar.
+   * @default false
+   */
+  normalize?: boolean
 }
 
 /**
@@ -38,16 +45,24 @@ export interface LinkProps extends Omit<ComponentProps<typeof NextLink>, 'locale
  * <Link href="/" locale="">English</Link>
  * <Link href="/" locale={false}>English</Link>
  * <Link href="/" locale={condition && 'ja'}>Conditional</Link>
+ *
+ * // With href normalization (removes existing locale prefix before processing)
+ * const pathname = usePathname() // '/ja/about'
+ * <Link href={pathname} locale="en" normalize>English</Link>  // → /en/about
  * ```
  */
-export function Link({ href, locale, ...props }: LinkProps) {
+export function Link({ href, locale, normalize = false, ...props }: LinkProps) {
   const currentLocale = useLocale()
+  const locales = useLocales()
   const pathname = usePathname()
+
+  // Get locales for normalization if enabled
+  const normalizeLocales = normalize ? locales : undefined
 
   // Handle both string and UrlObject
   const localizedHref = typeof href === 'string'
-    ? getLinkHref(href, pathname ?? '', currentLocale, locale)
-    : { ...href, pathname: getLinkHref(href.pathname ?? '', pathname ?? '', currentLocale, locale) }
+    ? getLinkHref(href, pathname ?? '', currentLocale, { locale, locales: normalizeLocales })
+    : { ...href, pathname: getLinkHref(href.pathname ?? '', pathname ?? '', currentLocale, { locale, locales: normalizeLocales }) }
 
   return <NextLink href={localizedHref} {...props} />
 }

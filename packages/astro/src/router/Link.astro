@@ -17,6 +17,10 @@
  * // Raw path (no localization)
  * <Link href="/" locale="">English</Link>
  * <Link href="/" locale={false}>English</Link>
+ *
+ * // With href normalization (removes existing locale prefix before processing)
+ * // Useful when href comes from usePathname() or similar
+ * <Link href="/ja/about" locale="en" normalize>English</Link>  // → /en/about
  * ```
  */
 import type { HTMLAttributes } from 'astro/types'
@@ -32,9 +36,15 @@ interface Props extends HTMLAttributes<'a'> {
    * - '' (empty string) or false: use href as-is without any localization
    */
   locale?: string | false
+  /**
+   * Normalize href by removing any existing locale prefix before processing.
+   * When true, locales are read from Astro.locals (set by middleware).
+   * @default false
+   */
+  normalize?: boolean
 }
 
-const { href, locale, ...attrs } = Astro.props
+const { href, locale, normalize = false, ...attrs } = Astro.props
 
 const locals = Astro.locals as Record<string, unknown>
 
@@ -45,7 +55,10 @@ const currentLocale = (Astro.params.locale as string | undefined)
 // Use original pathname if available (for SSR rewrite mode where URL is rewritten)
 const currentPathname = (locals.originalPathname as string | undefined) ?? Astro.url.pathname
 
-const localizedHref = getLinkHref(href, currentPathname, currentLocale, locale)
+// Get locales from middleware for normalization
+const locales = normalize ? (locals.locales as readonly string[] | undefined) : undefined
+
+const localizedHref = getLinkHref(href, currentPathname, currentLocale, { locale, locales })
 ---
 
 <a href={localizedHref} {...attrs}>

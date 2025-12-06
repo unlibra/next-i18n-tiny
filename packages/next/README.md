@@ -385,14 +385,14 @@ export default function Layout({ children, params }) {
 import { Link, useLocale } from '@/i18n'
 
 export function LanguageSwitcher() {
-  const locale = useLocale()
+  const pathname = usePathname()
 
   return (
     <div>
-      <Link href="/" locale="en" style={{ fontWeight: locale === 'en' ? 'bold' : 'normal' }}>
+      <Link href={pathname} locale="en" normalize> // /ja/about -> /en/about
         English
       </Link>
-      <Link href="/" locale="ja" style={{ fontWeight: locale === 'ja' ? 'bold' : 'normal' }}>
+      <Link href={pathname} locale="ja" normalize> // /en/about -> /ja/about
         日本語
       </Link>
     </div>

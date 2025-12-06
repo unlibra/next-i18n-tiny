@@ -96,6 +96,25 @@ export function hasLocalePrefix(pathname: string, locale: string): boolean {
 }
 
 /**
+ * Options for getLinkHref
+ */
+export interface GetLinkHrefOptions {
+  /**
+   * Override the locale for this link
+   * - undefined: auto-localize based on current URL (default)
+   * - string (e.g., 'ja'): generate path with specified locale prefix
+   * - '' (empty string) or false: use href as-is without any localization
+   */
+  locale?: string | false
+  /**
+   * Array of supported locales for href normalization.
+   * When provided, removes any existing locale prefix from href before processing.
+   * This allows `<Link href="/ja/about">` to work correctly for language switching.
+   */
+  locales?: readonly string[]
+}
+
+/**
  * Generate a link href based on current URL pattern
  *
  * Used by Link components to auto-detect whether to add locale prefix.
@@ -105,7 +124,7 @@ export function hasLocalePrefix(pathname: string, locale: string): boolean {
  * @param href - The target path (e.g., '/about')
  * @param currentPathname - The current URL pathname
  * @param currentLocale - The current locale (from params or context)
- * @param overrideLocale - Optional locale override (undefined = auto, '' | false = raw, 'ja' = explicit)
+ * @param options - Options object or legacy overrideLocale parameter
  * @returns The resolved href
  *
  * @example
@@ -117,20 +136,34 @@ export function hasLocalePrefix(pathname: string, locale: string): boolean {
  * getLinkHref('/about', '/page', 'ja')              // '/about' (URL has no prefix)
  *
  * // Explicit locale override
- * getLinkHref('/about', '/page', 'en', 'ja')        // '/ja/about'
+ * getLinkHref('/about', '/page', 'en', { locale: 'ja' })  // '/ja/about'
  *
  * // Raw path (no localization)
- * getLinkHref('/about', '/ja/page', 'ja', '')       // '/about'
- * getLinkHref('/about', '/ja/page', 'ja', false)    // '/about'
+ * getLinkHref('/about', '/ja/page', 'ja', { locale: '' })     // '/about'
+ * getLinkHref('/about', '/ja/page', 'ja', { locale: false })  // '/about'
+ *
+ * // With normalization (removes existing locale prefix from href)
+ * getLinkHref('/ja/about', '/en/page', 'en', { locale: 'en', locales: ['en', 'ja'] })  // '/en/about'
  * ```
  */
 export function getLinkHref(
   href: string,
   currentPathname: string,
   currentLocale: string | undefined,
-  overrideLocale?: string | false
+  options?: string | false | GetLinkHrefOptions
 ): string {
-  const cleanPath = href.startsWith('/') ? href : `/${href}`
+  // Handle legacy signature: getLinkHref(href, pathname, locale, 'ja')
+  const opts: GetLinkHrefOptions = typeof options === 'object' && options !== null
+    ? options
+    : { locale: options }
+
+  const { locale: overrideLocale, locales } = opts
+
+  // Normalize href by removing locale prefix if locales provided
+  let cleanPath = href.startsWith('/') ? href : `/${href}`
+  if (locales) {
+    cleanPath = removeLocalePrefix(cleanPath, locales)
+  }
 
   // overrideLocale="" or false → raw path (no localization)
   if (overrideLocale === '' || overrideLocale === false) {

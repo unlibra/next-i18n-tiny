@@ -95,17 +95,36 @@ function hasLocalePrefix(
 ): boolean
 ```
 
-### `getLinkHref(href, locale, currentPathname, locales, defaultLocale, prefixDefault?)`
+### `getLinkHref(href, currentPathname, currentLocale, options?)`
 
 ```typescript
+interface GetLinkHrefOptions {
+  locale?: string | false  // Override locale ('' or false for raw path)
+  locales?: readonly string[]  // For href normalization (removes existing prefix)
+}
+
 function getLinkHref(
   href: string,
-  locale: string | undefined,
   currentPathname: string,
-  locales: readonly string[],
-  defaultLocale: string,
-  prefixDefault?: boolean
+  currentLocale: string | undefined,
+  options?: string | false | GetLinkHrefOptions
 ): string
+```
+
+**Examples:**
+
+```typescript
+// Auto-detect from current URL
+getLinkHref('/about', '/ja/page', 'ja')  // '/ja/about'
+
+// Explicit locale override
+getLinkHref('/about', '/page', 'en', { locale: 'ja' })  // '/ja/about'
+
+// Raw path (no localization)
+getLinkHref('/about', '/ja/page', 'ja', { locale: false })  // '/about'
+
+// With normalization (removes existing locale prefix from href)
+getLinkHref('/ja/about', '/en/page', 'en', { locale: 'en', locales: ['en', 'ja'] })  // '/en/about'
 ```
 
 ---
@@ -255,8 +274,26 @@ type ProxyConfig = StandardRoutingConfig | RewriteRoutingConfig
 ```typescript
 interface LinkProps extends NextLinkProps {
   locale?: string | false  // Explicit locale, '' or false for raw path
+  normalize?: boolean      // Normalize href by removing existing locale prefix (default: false)
   // ... NextLinkProps
 }
+```
+
+**Examples:**
+
+```tsx
+// Auto-localized (uses current locale)
+<Link href="/about">About</Link>
+
+// Language switch with explicit locale
+<Link href="/" locale="ja">日本語</Link>
+
+// Raw path (no localization)
+<Link href="/" locale={false}>Home</Link>
+
+// With normalization (useful when href comes from usePathname())
+const pathname = usePathname() // '/ja/about'
+<Link href={pathname} locale="en" normalize>English</Link>  // → /en/about
 ```
 
 **Note**: `getLocalizedPath`, `removeLocalePrefix` are not re-exported. Import directly from `@i18n-tiny/core/router` if needed.
@@ -349,10 +386,29 @@ type MiddlewareConfig = StandardRoutingConfig | RewriteRoutingConfig
 interface Props {
   href: string
   locale?: string | false  // Explicit locale, '' or false for raw path
+  normalize?: boolean      // Normalize href by removing existing locale prefix (default: false)
   [key: string]: any  // Other HTML attributes
 }
 ---
 ```
+
+**Examples:**
+
+```astro
+<!-- Auto-localized (uses current locale) -->
+<Link href="/about">About</Link>
+
+<!-- Language switch with explicit locale -->
+<Link href="/" locale="ja">日本語</Link>
+
+<!-- Raw path (no localization) -->
+<Link href="/" locale={false}>Home</Link>
+
+<!-- With normalization (removes existing locale prefix from href) -->
+<Link href="/ja/about" locale="en" normalize>English</Link>  <!-- → /en/about -->
+```
+
+**Note**: `normalize` requires middleware to set `Astro.locals.locales`.
 
 ---
 

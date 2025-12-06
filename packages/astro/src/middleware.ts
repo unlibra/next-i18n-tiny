@@ -139,6 +139,10 @@ export function create(config: MiddlewareConfig): MiddlewareHandler {
 
   return async (context, next) => {
     const { pathname } = context.url
+    const locals = context.locals as Record<string, unknown>
+
+    // Always store locales for Link component normalization
+    locals.locales = locales
 
     // Skip excluded paths
     for (const excludePath of excludePaths) {
@@ -160,8 +164,6 @@ export function create(config: MiddlewareConfig): MiddlewareHandler {
 
     // SSR rewrite mode
     if (isRewriteMode) {
-      const locals = context.locals as Record<string, unknown>
-
       // Skip if locale already set (from previous rewrite)
       if (locals.locale) {
         return next()
