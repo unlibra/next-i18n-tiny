@@ -372,9 +372,10 @@ describe('Router Matrix Tests', () => {
       ['*', null, 'Wildcard (not supported)'],
       ['ja-JP', 'ja', 'Japanese (Japan) matches ja'],
       ['en-AU,en;q=0.9', 'en', 'Australian English matches en'],
-    ] as const)(
+    ])(
       'detectLocale("%s") → %s (%s)',
-      (acceptLanguage, expectedLocale) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      (acceptLanguage, expectedLocale, _description) => {
         const result = detectLocale(acceptLanguage, LOCALES)
         expect(result).toBe(expectedLocale)
       }
@@ -481,9 +482,10 @@ describe('Router Matrix Tests', () => {
         // No currentLocale → no prefix
         ['/about', '/page', undefined, '/about', 'no current locale'],
         ['/about', '/', undefined, '/about', 'no locale at root'],
-      ] as const)(
+      ])(
         'getLinkHref("%s", "%s", %s) → "%s" (%s)',
-        (href, currentPathname, currentLocale, expected) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        (href, currentPathname, currentLocale, expected, _description) => {
           expect(getLinkHref(href, currentPathname, currentLocale)).toBe(expected)
         }
       )

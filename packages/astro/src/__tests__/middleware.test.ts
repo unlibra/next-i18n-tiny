@@ -31,7 +31,9 @@ const createMockContext = (
   }
 }
 
-const createMockNext = () => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const createMockNext = (): any => {
+  // Test mock returns simplified object instead of full Response
   return vi.fn(() => Promise.resolve({ type: 'next' }))
 }
 
