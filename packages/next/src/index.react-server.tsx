@@ -99,8 +99,7 @@ export function define<
     useMessages: (): MessageType => clientOnlyError('useMessages'),
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     useTranslations: (_namespace?: string): ((key: MessageKeys, vars?: Record<string, string | number>) => string) => clientOnlyError('useTranslations'),
-    useLocale: (): string => clientOnlyError('useLocale'),
-    useLocalizedPath: (): ((path: string) => string) => clientOnlyError('useLocalizedPath')
+    useLocale: (): string => clientOnlyError('useLocale')
   }
 
   return {

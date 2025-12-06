@@ -7,9 +7,5 @@
 // Components
 export { Link } from './Link'
 
-// Hooks
-export { useLocalizedPath } from './useLocalizedPath'
-
-// Utilities
-export { getLocalizedPath } from './getLocalizedPath'
-export { removeLocalePrefix } from './removeLocalePrefix'
+// Re-export core router utilities
+export { getLocalizedPath, removeLocalePrefix } from '@i18n-tiny/core/router'

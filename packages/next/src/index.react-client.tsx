@@ -2,7 +2,6 @@
 
 import type { ReactNode } from 'react'
 
-import { useLocalizedPath } from './router/useLocalizedPath'
 import {
   I18nProvider as BaseProvider,
   useMessages as baseUseMessages,
@@ -11,7 +10,6 @@ import {
 } from '@i18n-tiny/react/internal'
 import type { NestedKeys } from '@i18n-tiny/core'
 import { resolveMessage } from '@i18n-tiny/core'
-import { removeLocalePrefix } from './router/removeLocalePrefix'
 
 export interface I18nConfig<
   L extends readonly string[],
@@ -134,8 +132,7 @@ export function define<
   const client = {
     useMessages,
     useTranslations,
-    useLocale,
-    useLocalizedPath
+    useLocale
   }
 
   return {

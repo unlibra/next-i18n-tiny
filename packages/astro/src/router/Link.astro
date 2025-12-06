@@ -19,6 +19,7 @@
  * ```
  */
 import type { HTMLAttributes } from 'astro/types'
+import { hasLocalePrefix } from '@i18n-tiny/core/router'
 
 interface Props extends HTMLAttributes<'a'> {
   /** The path to navigate to */
@@ -39,9 +40,7 @@ const currentLocale = Astro.params.locale as string | undefined
 const pathname = Astro.url.pathname
 
 // Check if current URL has locale prefix
-const hasExplicitLocale = currentLocale
-  ? pathname.startsWith(`/${currentLocale}/`) || pathname === `/${currentLocale}`
-  : false
+const urlHasPrefix = currentLocale ? hasLocalePrefix(pathname, currentLocale) : false
 
 // Generate localized href
 const cleanPath = href.startsWith('/') ? href : `/${href}`
@@ -53,7 +52,7 @@ if (locale === '') {
 } else if (locale !== undefined) {
   // locale="ja" → explicit locale prefix
   localizedHref = cleanPath === '/' ? `/${locale}` : `/${locale}${cleanPath}`
-} else if (hasExplicitLocale && currentLocale) {
+} else if (urlHasPrefix && currentLocale) {
   // Auto-localize: current URL has prefix → add prefix
   localizedHref = cleanPath === '/' ? `/${currentLocale}` : `/${currentLocale}${cleanPath}`
 } else {
