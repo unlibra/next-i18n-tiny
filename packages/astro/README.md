@@ -34,7 +34,7 @@ yarn add @i18n-tiny/astro
 
 ### Project Structure
 
-```
+```text
 src/
 ├── pages/
 │   └── [locale]/
@@ -49,7 +49,9 @@ src/
 
 ### Minimal Setup
 
-**1. Create message files**
+Place this file anywhere in your project.
+
+#### **1. Create message files**
 
 ```typescript
 // src/messages/en.ts
@@ -79,7 +81,9 @@ export default {
 }
 ```
 
-**2. Define i18n instance**
+#### **2. Define i18n instance**
+
+Place this file anywhere in your project (`i18n.ts`, `lib/i18n/index.ts`, etc.)
 
 ```typescript
 // src/i18n.ts
@@ -98,7 +102,7 @@ export const { getMessages, getTranslations } = define({
 })
 ```
 
-**3. Setup middleware**
+#### **3. Setup middleware**
 
 ```typescript
 // src/middleware.ts
@@ -106,22 +110,20 @@ import { defineMiddleware } from 'astro/middleware'
 import { create } from '@i18n-tiny/astro/middleware'
 import { locales, defaultLocale } from './i18n'
 
-export const onRequest = defineMiddleware(
-  create({
-    locales,
-    defaultLocale
-  })
-)
+const middleware = create({
+  locales,
+  defaultLocale
+})
+
+export const onRequest = defineMiddleware(middleware)
 ```
 
-**4. Use in pages**
+#### **4. Use in pages**
 
 ```astro
 ---
 // src/pages/[locale]/index.astro
 import { getMessages, getTranslations } from '../../i18n'
-import Link from '@i18n-tiny/astro/router/Link.astro'
-
 const { locale } = Astro.params
 
 const messages = getMessages(locale)
@@ -137,11 +139,6 @@ const t = getTranslations(locale)
     <h1>{messages.common.title}</h1>
     <p>{t('common.description')}</p>
     {/*    ^^^^^^^^^^^^^^^^^^ Auto-complete */}
-
-    <nav>
-      <Link href="/">{t('nav.home')}</Link>
-      <Link href="/about">{t('nav.about')}</Link>
-    </nav>
   </body>
 </html>
 ```
@@ -158,11 +155,11 @@ Defines an i18n instance with automatic type inference.
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `locales` | `readonly string[]` | Array of supported locales (optional, inferred from messages) |
-| `defaultLocale` | `string` | Default locale (optional, uses first locale) |
-| `messages` | `Record<Locale, Messages>` | Messages object keyed by locale |
+| Parameter       | Type                       | Description                                                   |
+| --------------- | -------------------------- | ------------------------------------------------------------- |
+| `locales`       | `readonly string[]`        | Array of supported locales (optional, inferred from messages) |
+| `defaultLocale` | `string`                   | Default locale (optional, uses first locale)                  |
+| `messages`      | `Record<Locale, Messages>` | Messages object keyed by locale                               |
 
 **Returns:**
 
@@ -187,24 +184,24 @@ Creates an Astro middleware handler for i18n routing.
 
 **Parameters:**
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `locales` | `readonly string[]` | - | Array of supported locales |
-| `defaultLocale` | `string` | - | Default locale for redirects |
-| `fallbackLocale` | `string` | `defaultLocale` | Fallback when detection fails |
-| `excludePaths` | `string[]` | `[]` | Paths to exclude from i18n handling |
-| `prefixDefault` | `boolean` | `false` | Whether to prefix default locale in URLs |
-| `detectLanguage` | `boolean` | `true` | Whether to detect from Accept-Language |
-| `routing` | `'rewrite'` | - | SSR rewrite mode (mutually exclusive with prefixDefault/detectLanguage) |
+| Parameter        | Type                | Default         | Description                                                             |
+| ---------------- | ------------------- | --------------- | ----------------------------------------------------------------------- |
+| `locales`        | `readonly string[]` | -               | Array of supported locales                                              |
+| `defaultLocale`  | `string`            | -               | Default locale for redirects                                            |
+| `fallbackLocale` | `string`            | `defaultLocale` | Fallback when detection fails                                           |
+| `excludePaths`   | `string[]`          | `[]`            | Paths to exclude from i18n handling                                     |
+| `prefixDefault`  | `boolean`           | `false`         | Whether to prefix default locale in URLs                                |
+| `detectLanguage` | `boolean`           | `true`          | Whether to detect from Accept-Language                                  |
+| `routing`        | `'rewrite'`         | -               | SSR rewrite mode (mutually exclusive with prefixDefault/detectLanguage) |
 
 **Routing Behavior Matrix:**
 
-| prefixDefault | detectLanguage | `/` behavior |
-|---------------|----------------|--------------|
-| `false` | `false` | Serves fallbackLocale, no detection |
-| `false` | `true` | Detects, redirects non-default, rewrites default |
-| `true` | `false` | Redirects to `/[defaultLocale]` |
-| `true` | `true` | Detects and redirects to detected locale |
+| prefixDefault | detectLanguage | `/` behavior                                     |
+| ------------- | -------------- | ------------------------------------------------ |
+| `false`       | `false`        | Serves fallbackLocale, no detection              |
+| `false`       | `true`         | Detects, redirects non-default, rewrites default |
+| `true`        | `false`        | Redirects to `/[defaultLocale]`                  |
+| `true`        | `true`         | Detects and redirects to detected locale         |
 
 **Examples:**
 

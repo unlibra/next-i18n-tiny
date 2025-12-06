@@ -10,13 +10,6 @@ Type-safe, zero-dependency i18n library for Next.js App Router with React Server
 
 Inspired by next-intl, designed for simplicity and type safety.
 
-## Live Demo
-
-This library is used at **[8px.app](https://8px.app)**.
-You can try the language switcher in the header to see it in action.
-
-Source code: [https://github.com/unlibra/8px.app](https://github.com/unlibra/8px.app)
-
 ## Features
 
 - **Type-safe**: Full TypeScript support with **automatic type inference** - autocomplete for `messages.site.name`, `t('common.title')`, and all nested keys
@@ -41,7 +34,7 @@ yarn add @i18n-tiny/next
 
 ### Project Structure
 
-```
+```text
 your-app/
 ├── app/
 │   └── [locale]/
@@ -56,7 +49,9 @@ your-app/
 
 ### Minimal Setup
 
-**1. Create message files**
+#### **1. Create message files**
+
+Place this file anywhere in your project.
 
 ```typescript
 // messages/en.ts
@@ -86,9 +81,9 @@ export default {
 }
 ```
 
-**2. Define i18n instance**
+#### **2. Define i18n instance**
 
-Place this file anywhere in your project (`i18n.ts`, `lib/i18n.ts`, etc.)
+Place this file anywhere in your project (`i18n.ts`, `lib/i18n/index.ts`, etc.)
 
 ```typescript
 // i18n.ts
@@ -112,7 +107,7 @@ export const { useMessages, useTranslations, useLocale } = client
 export const { getMessages, getTranslations } = server
 ```
 
-**3. Setup Proxy**
+#### **3. Setup Proxy**
 
 ```typescript
 // proxy.ts (Next.js 16+) or middleware.ts (Next.js 15)
@@ -129,7 +124,7 @@ export const config = {
 }
 ```
 
-**4. Use in Layout**
+#### **4. Use in Layout**
 
 ```typescript
 // app/[locale]/layout.tsx
@@ -147,7 +142,7 @@ export default async function Layout({ children, params }) {
 }
 ```
 
-**5. Use in Components**
+#### **5. Use in Components**
 
 ```typescript
 // Server Component
@@ -211,11 +206,11 @@ Defines an i18n instance with automatic type inference.
 
 **Parameters:**
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `locales` | `readonly string[]` | Array of supported locales (e.g., `['en', 'ja'] as const`) |
-| `defaultLocale` | `string` | Default locale |
-| `messages` | `Record<Locale, Messages>` | Messages object keyed by locale |
+| Parameter       | Type                       | Description                                                |
+| --------------- | -------------------------- | ---------------------------------------------------------- |
+| `locales`       | `readonly string[]`        | Array of supported locales (e.g., `['en', 'ja'] as const`) |
+| `defaultLocale` | `string`                   | Default locale                                             |
+| `messages`      | `Record<Locale, Messages>` | Messages object keyed by locale                            |
 
 **Returns:**
 
@@ -248,23 +243,23 @@ Creates a Next.js proxy (middleware) handler for i18n routing.
 
 **Parameters:**
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `locales` | `readonly string[]` | - | Array of supported locales |
-| `defaultLocale` | `string` | - | Default locale for redirects |
-| `fallbackLocale` | `string` | `defaultLocale` | Fallback when detection fails |
-| `prefixDefault` | `boolean` | `false` | Whether to prefix default locale in URLs |
-| `detectLanguage` | `boolean` | `true` | Whether to detect from Accept-Language |
-| `routing` | `'rewrite'` | - | SSR rewrite mode (mutually exclusive with prefixDefault/detectLanguage) |
+| Parameter        | Type                | Default         | Description                                                             |
+| ---------------- | ------------------- | --------------- | ----------------------------------------------------------------------- |
+| `locales`        | `readonly string[]` | -               | Array of supported locales                                              |
+| `defaultLocale`  | `string`            | -               | Default locale for redirects                                            |
+| `fallbackLocale` | `string`            | `defaultLocale` | Fallback when detection fails                                           |
+| `prefixDefault`  | `boolean`           | `false`         | Whether to prefix default locale in URLs                                |
+| `detectLanguage` | `boolean`           | `true`          | Whether to detect from Accept-Language                                  |
+| `routing`        | `'rewrite'`         | -               | SSR rewrite mode (mutually exclusive with prefixDefault/detectLanguage) |
 
 **Routing Behavior Matrix:**
 
-| prefixDefault | detectLanguage | `/` behavior |
-|---------------|----------------|--------------|
-| `false` | `false` | Serves fallbackLocale, no detection |
-| `false` | `true` | Detects, redirects non-default, rewrites default |
-| `true` | `false` | Redirects to `/[defaultLocale]` |
-| `true` | `true` | Detects and redirects to detected locale |
+| prefixDefault | detectLanguage | `/` behavior                                     |
+| ------------- | -------------- | ------------------------------------------------ |
+| `false`       | `false`        | Serves fallbackLocale, no detection              |
+| `false`       | `true`         | Detects, redirects non-default, rewrites default |
+| `true`        | `false`        | Redirects to `/[defaultLocale]`                  |
+| `true`        | `true`         | Detects and redirects to detected locale         |
 
 **Examples:**
 
@@ -401,14 +396,9 @@ export function LanguageSwitcher() {
 }
 ```
 
-## Migration from next-i18n-tiny
+## Examples
 
-```diff
-- import { define } from 'next-i18n-tiny'
-+ import { define } from '@i18n-tiny/next'
-```
-
-The API is 100% compatible. Just change the package name.
+See the [examples](../../examples) directory for complete working examples.
 
 ## License
 

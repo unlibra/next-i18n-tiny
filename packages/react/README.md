@@ -13,7 +13,7 @@ npm install @i18n-tiny/react
 
 ## Quick Start
 
-### 1. Define i18n Instance
+### 1. Define i18n - that's all you need
 
 ```typescript
 // src/i18n.ts
@@ -33,38 +33,31 @@ const jaMessages = {
   }
 } as const
 
-export const i18n = define({
+// define() gives you everything
+export const { Provider, useMessages, useTranslations, useLocale } = define({
   locales: ['en', 'ja'] as const,
   defaultLocale: 'en',
-  messages: {
-    en: enMessages,
-    ja: jaMessages
-  }
+  messages: { en: enMessages, ja: jaMessages }
 })
 ```
 
-### 2. Wrap Your App with Provider
+### 2. Wrap with Provider
 
 ```tsx
 // src/App.tsx
 import { useState } from 'react'
-import { i18n } from './i18n'
-
-const messages = {
-  en: enMessages,
-  ja: jaMessages
-}
+import { Provider } from './i18n'
 
 function App() {
   const [locale, setLocale] = useState('en')
 
   return (
-    <i18n.Provider locale={locale} messages={messages[locale]}>
+    <Provider locale={locale} messages={messages[locale]}>
       <YourApp />
       <button onClick={() => setLocale(locale === 'en' ? 'ja' : 'en')}>
         Toggle Language
       </button>
-    </i18n.Provider>
+    </Provider>
   )
 }
 ```
@@ -73,12 +66,12 @@ function App() {
 
 ```tsx
 // src/components/Greeting.tsx
-import { i18n } from '../i18n'
+import { useMessages, useTranslations, useLocale } from '../i18n'
 
 function Greeting() {
-  const t = i18n.useTranslations()
-  const messages = i18n.useMessages()
-  const locale = i18n.useLocale()
+  const messages = useMessages()
+  const t = useTranslations()
+  const locale = useLocale()
 
   return (
     <div>
@@ -97,14 +90,15 @@ function Greeting() {
 Creates an i18n instance with type-safe hooks.
 
 ```typescript
-const i18n = define({
-  locales: ['en', 'ja'] as const,  // Supported locales
-  defaultLocale: 'en',              // Default locale
-  messages: { en: {...}, ja: {...} } // Message dictionaries
+const { Provider, useMessages, useTranslations, useLocale } = define({
+  locales: ['en', 'ja'] as const,
+  defaultLocale: 'en',
+  messages: { en: {...}, ja: {...} }
 })
 ```
 
 Returns:
+
 - `Provider` - React context provider component
 - `useMessages()` - Hook to access raw message object
 - `useTranslations(namespace?)` - Hook to get translation function
@@ -117,12 +111,13 @@ Returns:
 Wraps your app to provide i18n context.
 
 ```tsx
-<i18n.Provider locale="en" messages={messages.en}>
+<Provider locale="en" messages={messages.en}>
   {children}
-</i18n.Provider>
+</Provider>
 ```
 
 Props:
+
 - `locale: string` - Current locale
 - `messages: MessageType` - Message dictionary for current locale
 - `children: ReactNode` - Child components
@@ -132,7 +127,7 @@ Props:
 Returns the raw message object with full type inference.
 
 ```tsx
-const messages = i18n.useMessages()
+const messages = useMessages()
 // messages.common.title is typed as string
 ```
 
@@ -141,11 +136,11 @@ const messages = i18n.useMessages()
 Returns a translation function with interpolation support.
 
 ```tsx
-const t = i18n.useTranslations()
+const t = useTranslations()
 t('common.welcome', { name: 'John' }) // "Welcome, John!"
 
 // With namespace
-const t = i18n.useTranslations('common')
+const t = useTranslations('common')
 t('welcome', { name: 'John' }) // "Welcome, John!"
 ```
 
@@ -154,7 +149,7 @@ t('welcome', { name: 'John' }) // "Welcome, John!"
 Returns the current locale string.
 
 ```tsx
-const locale = i18n.useLocale() // "en" | "ja"
+const locale = useLocale() // "en" | "ja"
 ```
 
 ## TypeScript
@@ -162,7 +157,7 @@ const locale = i18n.useLocale() // "en" | "ja"
 Full type inference is automatic:
 
 ```typescript
-const t = i18n.useTranslations()
+const t = useTranslations()
 
 // Type error: 'invalid.key' doesn't exist
 t('invalid.key')

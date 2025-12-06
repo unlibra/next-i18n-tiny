@@ -1,17 +1,17 @@
 # API Specification
 
-設計者向けAPI仕様書。全パッケージのエクスポート一覧と詳細仕様。
+API specification for developers. Complete export list and detailed specifications for all packages.
 
 ## Package Overview
 
-```
-@i18n-tiny/core          - コア機能（DefineConfig type）
-@i18n-tiny/core/middleware - ミドルウェア用（detectLocale）
-@i18n-tiny/core/router   - ルーティング用（getLocalizedPath等）
-@i18n-tiny/core/internal - 内部用（resolveMessage, NestedKeys）※非公開
-@i18n-tiny/react         - React用（Provider, hooks）
-@i18n-tiny/next          - Next.js用（RSC対応、proxy）
-@i18n-tiny/astro         - Astro用（middleware）
+```text
+@i18n-tiny/core          - Core functionality (DefineConfig type)
+@i18n-tiny/core/middleware - Middleware utilities (detectLocale)
+@i18n-tiny/core/router   - Routing utilities (getLocalizedPath, etc.)
+@i18n-tiny/core/internal - Internal use only (resolveMessage, NestedKeys) *not public*
+@i18n-tiny/react         - React (Provider, hooks)
+@i18n-tiny/next          - Next.js (RSC support, proxy)
+@i18n-tiny/astro         - Astro (middleware)
 ```
 
 ---
@@ -20,9 +20,9 @@
 
 ### Exports
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `DefineConfig` | type | `define()` の設定型 |
+| Export         | Kind | Description                       |
+| -------------- | ---- | --------------------------------- |
+| `DefineConfig` | type | Configuration type for `define()` |
 
 ### `DefineConfig<L, M>`
 
@@ -40,9 +40,9 @@ interface DefineConfig<L extends string, M extends Record<string, any>> {
 
 ### Exports
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `detectLocale` | function | Accept-Languageヘッダーからロケールを検出 |
+| Export         | Kind     | Description                               |
+| -------------- | -------- | ----------------------------------------- |
+| `detectLocale` | function | Detect locale from Accept-Language header |
 
 ### `detectLocale(acceptLanguage, supportedLocales)`
 
@@ -59,12 +59,12 @@ function detectLocale(
 
 ### Exports
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `getLocalizedPath` | function | ロケールプレフィックス付きパス生成 |
-| `removeLocalePrefix` | function | パスからロケールプレフィックスを除去 |
-| `hasLocalePrefix` | function | パスがロケールプレフィックスを持つか判定 |
-| `getLinkHref` | function | Link用のhref計算（内部用） |
+| Export               | Kind     | Description                            |
+| -------------------- | -------- | -------------------------------------- |
+| `getLocalizedPath`   | function | Generate path with locale prefix       |
+| `removeLocalePrefix` | function | Remove locale prefix from path         |
+| `hasLocalePrefix`    | function | Check if path has locale prefix        |
+| `getLinkHref`        | function | Calculate href for Link (internal use) |
 
 ### `getLocalizedPath(path, locale, defaultLocale, prefixDefault?)`
 
@@ -112,14 +112,14 @@ function getLinkHref(
 
 ## @i18n-tiny/core/internal
 
-**注意**: このサブパスは内部使用のみ。ユーザーには公開しない。
+**Note**: This subpath is for internal use only. Not exposed to users.
 
 ### Exports (Internal Only)
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `resolveMessage` | function | メッセージ解決 |
-| `NestedKeys` | type | ネストされたキーの型ユーティリティ |
+| Export           | Kind     | Description                  |
+| ---------------- | -------- | ---------------------------- |
+| `resolveMessage` | function | Message resolution           |
+| `NestedKeys`     | type     | Type utility for nested keys |
 
 ---
 
@@ -127,11 +127,11 @@ function getLinkHref(
 
 ### Exports
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `define` | function | i18nインスタンス生成 |
-| `DefineConfig` | type | re-export from core |
-| `ProviderProps` | type | Providerのprops型 |
+| Export          | Kind     | Description             |
+| --------------- | -------- | ----------------------- |
+| `define`        | function | Create i18n instance    |
+| `DefineConfig`  | type     | Re-export from core     |
+| `ProviderProps` | type     | Props type for Provider |
 
 ### `define(config)` Returns
 
@@ -150,7 +150,7 @@ function getLinkHref(
 }
 ```
 
-**注意**: `messages` は戻り値に含まれない。`useMessages()` や `useTranslations()` 経由でのみアクセス可能。Providerへのmessages渡しはユーザーが自分で管理する。
+**Note**: `messages` is not included in the return value. Access only via `useMessages()` or `useTranslations()`. Users manage passing messages to Provider themselves.
 
 ---
 
@@ -158,10 +158,10 @@ function getLinkHref(
 
 ### Exports
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `define` | function | i18nインスタンス生成（RSC対応） |
-| `DefineConfig` | type | re-export from core |
+| Export         | Kind     | Description                        |
+| -------------- | -------- | ---------------------------------- |
+| `define`       | function | Create i18n instance (RSC support) |
+| `DefineConfig` | type     | Re-export from core                |
 
 ### `define(config)` Returns
 
@@ -186,7 +186,7 @@ function getLinkHref(
 }
 ```
 
-**注意**: `Link` は `define()` から返されない。`@i18n-tiny/next/router` から別途インポート。
+**Note**: `Link` is not returned from `define()`. Import separately from `@i18n-tiny/next/router`.
 
 ---
 
@@ -194,10 +194,10 @@ function getLinkHref(
 
 ### Exports
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `create` | function | proxy/middleware生成 |
-| `ProxyConfig` | type | `create()` の設定型 |
+| Export        | Kind     | Description                       |
+| ------------- | -------- | --------------------------------- |
+| `create`      | function | Create proxy/middleware           |
+| `ProxyConfig` | type     | Configuration type for `create()` |
 
 ### `create(config)`
 
@@ -233,12 +233,12 @@ type ProxyConfig = StandardRoutingConfig | RewriteRoutingConfig
 
 ### Routing Behavior Matrix
 
-| prefixDefault | detectLanguage | `/` の挙動 |
-|---------------|----------------|-----------|
-| `false` | `false` | fallbackLocaleを返す、検出なし |
-| `false` | `true` | 検出→非デフォルトはリダイレクト、デフォルトはrewrite |
-| `true` | `false` | `/[defaultLocale]` へリダイレクト |
-| `true` | `true` | 検出→検出されたロケールへリダイレクト |
+| prefixDefault | detectLanguage | `/` behavior                                      |
+| ------------- | -------------- | ------------------------------------------------- |
+| `false`       | `false`        | Serves fallbackLocale, no detection               |
+| `false`       | `true`         | Detects → redirects non-default, rewrites default |
+| `true`        | `false`        | Redirects to `/[defaultLocale]`                   |
+| `true`        | `true`         | Detects → redirects to detected locale            |
 
 ---
 
@@ -246,20 +246,20 @@ type ProxyConfig = StandardRoutingConfig | RewriteRoutingConfig
 
 ### Exports
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `Link` | component | ローカライズ対応Linkコンポーネント |
+| Export | Kind      | Description              |
+| ------ | --------- | ------------------------ |
+| `Link` | component | Localized Link component |
 
 ### `Link` Props
 
 ```typescript
 interface LinkProps extends NextLinkProps {
-  locale?: string  // 明示的ロケール指定、'' で生パス
+  locale?: string  // Explicit locale, '' for raw path
   // ... NextLinkProps
 }
 ```
 
-**注意**: `getLocalizedPath`, `removeLocalePrefix` は re-export しない。必要なら `@i18n-tiny/core/router` から直接インポート。
+**Note**: `getLocalizedPath`, `removeLocalePrefix` are not re-exported. Import directly from `@i18n-tiny/core/router` if needed.
 
 ---
 
@@ -267,10 +267,10 @@ interface LinkProps extends NextLinkProps {
 
 ### Exports
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `define` | function | i18nインスタンス生成 |
-| `DefineConfig` | type | re-export from core |
+| Export         | Kind     | Description          |
+| -------------- | -------- | -------------------- |
+| `define`       | function | Create i18n instance |
+| `DefineConfig` | type     | Re-export from core  |
 
 ### `define(config)` Returns
 
@@ -283,7 +283,7 @@ interface LinkProps extends NextLinkProps {
 }
 ```
 
-**注意**: Astroの `define()` は `Provider` を返さない（Astroはサーバーファースト）。
+**Note**: Astro's `define()` does not return `Provider` (Astro is server-first).
 
 ---
 
@@ -291,10 +291,10 @@ interface LinkProps extends NextLinkProps {
 
 ### Exports
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `create` | function | middleware生成 |
-| `MiddlewareConfig` | type | `create()` の設定型 |
+| Export             | Kind     | Description                       |
+| ------------------ | -------- | --------------------------------- |
+| `create`           | function | Create middleware                 |
+| `MiddlewareConfig` | type     | Configuration type for `create()` |
 
 ### `create(config)`
 
@@ -330,7 +330,7 @@ interface RewriteRoutingConfig {
 type MiddlewareConfig = StandardRoutingConfig | RewriteRoutingConfig
 ```
 
-**Astro固有オプション**: `excludePaths` - 処理をスキップするパス（例: `['/api', '/_image']`）
+**Astro-specific option**: `excludePaths` - Paths to skip processing (e.g., `['/api', '/_image']`)
 
 ---
 
@@ -338,9 +338,9 @@ type MiddlewareConfig = StandardRoutingConfig | RewriteRoutingConfig
 
 ### Exports
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `Link.astro` | component | ローカライズ対応Linkコンポーネント |
+| Export       | Kind      | Description              |
+| ------------ | --------- | ------------------------ |
+| `Link.astro` | component | Localized Link component |
 
 ### `Link.astro` Props
 
@@ -348,8 +348,8 @@ type MiddlewareConfig = StandardRoutingConfig | RewriteRoutingConfig
 ---
 interface Props {
   href: string
-  locale?: string  // 明示的ロケール指定、'' で生パス
-  [key: string]: any  // その他のHTML属性
+  locale?: string  // Explicit locale, '' for raw path
+  [key: string]: any  // Other HTML attributes
 }
 ---
 ```
@@ -358,52 +358,51 @@ interface Props {
 
 ## Design Decisions
 
-### 1. `Link` は `define()` から返さない
+### 1. `Link` is not returned from `define()`
 
-- `Link` はコンテキストに依存しない独立したコンポーネント
-- URLから自動でロケールを検出する
-- `define()` の設定（locales, defaultLocale）はURLパターンから推測可能
+- `Link` is an independent component that doesn't depend on context
+- Auto-detects locale from URL
+- `define()` settings (locales, defaultLocale) can be inferred from URL patterns
 
-### 2. Router utilities は core/router から直接インポート
+### 2. Router utilities are imported directly from core/router
 
-- `getLocalizedPath`, `removeLocalePrefix` はヘビーユーザー向け
-- パッケージ間でre-exportせず、`@i18n-tiny/core/router` から直接使用
-- APIサーフェスを最小限に保つ
+- `getLocalizedPath`, `removeLocalePrefix` are for power users
+- Not re-exported across packages; use directly from `@i18n-tiny/core/router`
+- Keeps API surface minimal
 
-### 3. Astro は `Provider` を返さない
+### 3. Astro does not return `Provider`
 
-- Astroはサーバーファーストアーキテクチャ
-- クライアントコンテキストは不要
-- `getMessages`, `getTranslations` を直接使用
+- Astro has a server-first architecture
+- Client context is not needed
+- Use `getMessages`, `getTranslations` directly
 
-### 4. Next.js の `server` と `client` 分離
+### 4. Next.js `server` and `client` separation
 
-- RSC環境では `client` APIがエラーをスロー
-- 明示的な分離で誤用を防止
-- `server` はPromiseを返す（async/await対応）
+- In RSC environment, `client` API throws error
+- Explicit separation prevents misuse
+- `server` returns Promises (async/await compatible)
 
-### 5. Config型の命名
+### 5. Config type naming
 
-- `DefineConfig` - `define()` 関数用
-- `ProxyConfig` - Next.js `create()` 用
-- `MiddlewareConfig` - Astro `create()` 用
+- `DefineConfig` - For `define()` function
+- `ProxyConfig` - For Next.js `create()`
+- `MiddlewareConfig` - For Astro `create()`
 
-### 6. core の subpath 構造
+### 6. core subpath structure
 
-- `/` - `DefineConfig` のみ（define用の型）
-- `/middleware` - `detectLocale`（ミドルウェア層のロジック）
-- `/router` - パス操作関数群
-- `/internal` - 非公開（`resolveMessage`, `NestedKeys`）
+- `/` - `DefineConfig` only (type for define)
+- `/middleware` - `detectLocale` (middleware layer logic)
+- `/router` - Path manipulation functions
+- `/internal` - Not public (`resolveMessage`, `NestedKeys`)
 
 ---
 
 ## Internal Types (Not Exported Publicly)
 
-以下は内部使用のみ。ドキュメントには記載するがユーザーには公開しない。
+The following are for internal use only. Documented but not exposed to users.
 
-| Type | Package | Purpose |
-|------|---------|---------|
-| `NestedKeys<T>` | core/internal | メッセージキーの型推論 |
-| `TranslationFunction` | all | `t()` 関数の型 |
-| `resolveMessage` | core/internal | キー解決とinterpolation |
-
+| Type                  | Package       | Purpose                          |
+| --------------------- | ------------- | -------------------------------- |
+| `NestedKeys<T>`       | core/internal | Type inference for message keys  |
+| `TranslationFunction` | all           | Type for `t()` function          |
+| `resolveMessage`      | core/internal | Key resolution and interpolation |
